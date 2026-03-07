@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources\Projects\Schemas;
 
+use App\Filament\Schemas\Components\SharedFileUpload;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\FileUpload;
 
 class ProjectForm
 {
@@ -14,25 +14,14 @@ class ProjectForm
     {
         return $schema
             ->components([
-                FileUpload::make('image_path')
-                    ->label('Image')
-                    ->image()
-                    ->directory('projects')
-                    ->disk('public')
-                    ->visibility('public')
-                    ->imageEditor()
-                    ->previewable()
-                    ->openable()
-                    ->required(),
+                SharedFileUpload::make('image_path', 'Image', 'projects'),
 
                 TextInput::make('title')
-                    ->label('Title')
-                    ->required(),
+                    ->label('Title'),
 
                 TextInput::make('slug')
                     ->label('Slug')
-                    ->unique(ignoreRecord: true)
-                    ->required(),
+                    ->unique(ignoreRecord: true),
 
                 Select::make('category')
                     ->label('Category')
@@ -40,12 +29,10 @@ class ProjectForm
                         'App' => 'App',
                         'Web' => 'Web',
                         'Chatbot' => 'Chatbot',
-                    ])
-                    ->required(),
+                    ]),
 
                 Textarea::make('description')
-                    ->label('Description')
-                    ->required(),
+                    ->label('Description'),
             ]);
     }
 }

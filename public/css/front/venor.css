@@ -1,0 +1,106 @@
+/* ========================================
+   FUN FACTS / STATS SECTION
+======================================== */
+.fun-facts-section {
+    padding: 120px 0;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.fun-facts-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #cbd5e1, transparent);
+}
+
+.fun-facts-heading1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-align: center;
+    color: #1e293b;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.fun-facts-heading1::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(45deg, #f59e0b, #fbbf24);
+    border-radius: 2px;
+}
+
+.fun-facts-section p {
+    font-size: 1.2rem;
+    color: #64748b;
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto 4rem;
+    line-height: 1.6;
+}
+
+.fun-facts-timer {
+    margin-top: 2.5rem;
+}
+
+.radial {
+    text-align: center;
+    padding: 0 10px;
+}
+
+.timer {
+    display: block;
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: #1e293b;
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.2;
+    margin-bottom: 0.35rem;
+}
+
+.timer::after {
+    display: none;
+}
+
+.fun-facts-section h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #475569;
+    margin: 0;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.fun-facts-timer .col-md-3 {
+    margin-bottom: 1.75rem;
+}
+
+/* RESPONSIVE */
+@media (max-width: 992px) {
+    .timer {
+        font-size: 2.1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .fun-facts-section {
+        padding: 80px 0;
+    }
+
+    .fun-facts-heading1 {
+        font-size: 2rem;
+    }
+
+    .timer {
+        font-size: 1.9rem;
+    }
+}

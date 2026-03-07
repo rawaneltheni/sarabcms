@@ -4,9 +4,11 @@
     <title>@yield('title') | Sarab Tech</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <link rel="shortcut icon" href="https://sarab.tech/public/images/media/1689461139icon light.png">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{{ asset('css/front/venor.css') }}" rel="stylesheet">
 
     <style>
         :root { --sarab-blue: #007bff; }
@@ -24,7 +26,7 @@
             border-bottom:1px solid rgba(255,255,255,0.1);
         }
         .header__content__venor { display:flex; justify-content:space-between; align-items:center; max-width:1200px; margin:0 auto; padding:0 25px; }
-        .header__logo img { width:105px; }
+        .header__logo img { width:160px; max-width:100%; height:auto; display:block; }
         .header__actions__venor { display:flex; gap:15px; }
         .header__action-btn { color:#fff; text-decoration:none; padding:10px 24px; border-radius:50px; border:1.5px solid rgba(255,255,255,0.3); transition:0.3s; }
         .header__action-btn:hover { background:#fff; color:#000; }
@@ -34,39 +36,223 @@
         .footer-section { border-top:1px solid rgba(255,255,255,0.05); margin-top:80px; padding:40px 0; text-align:center; }
         .container { max-width:1200px; margin:0 auto; }
 
-        /* Chat UI */
-        #sarab-chat-toggle {
-            position:fixed; bottom:25px; right:25px;
-            width:60px; height:60px; background:var(--sarab-blue); color:#fff;
-            border-radius:50%; display:flex; justify-content:center; align-items:center;
-            font-size:24px; cursor:pointer; box-shadow:0 8px 25px rgba(0,0,0,0.3); z-index:9999;
+        .sarab-chat-launcher {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            min-width: 64px;
+            height: 64px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 999px;
+            background: var(--sarab-blue);
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 18px;
+            cursor: pointer;
+            z-index: 1200;
+            box-shadow: 0 12px 28px rgba(0, 123, 255, 0.35);
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
-        #sarab-chat-box {
-            position:fixed; bottom:100px; right:25px;
-            width:370px; height:520px; background:#fff; border-radius:15px;
-            display:none; flex-direction:column; overflow:hidden;
-            box-shadow:0 15px 45px rgba(0,0,0,0.3); z-index:9999;
+        .sarab-chat-launcher:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 32px rgba(0, 123, 255, 0.4);
         }
+
+        .sarab-chat-box {
+            position: fixed;
+            right: 24px;
+            bottom: 100px;
+            width: min(390px, calc(100vw - 28px));
+            height: min(560px, calc(100dvh - 124px));
+            max-height: calc(100dvh - 124px);
+            background: #0f1115;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 16px;
+            overflow: hidden;
+            display: none;
+            flex-direction: column;
+            z-index: 1200;
+            box-shadow: 0 22px 55px rgba(0, 0, 0, 0.55);
+        }
+
+        .sarab-chat-box.open { display: flex; }
 
         .sarab-chat-header {
-            background:var(--sarab-blue); color:#fff;
-            padding:15px; display:flex; justify-content:space-between; align-items:center;
+            padding: 14px 16px;
+            background: linear-gradient(135deg, #0f62fe, #0a4bcc);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.16);
         }
 
-        #sarab-chat-messages { flex:1; padding:15px; overflow-y:auto; background:#f4f6fb; }
-
-        .message-user {
-            background:var(--sarab-blue); color:#fff; padding:10px 14px; border-radius:18px; margin-bottom:10px; max-width:75%; margin-left:auto;
+        .sarab-chat-brand {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
         }
 
-        .message-bot {
-            background:#fff; color:#333; padding:10px 14px; border-radius:18px; margin-bottom:10px; max-width:75%; border:1px solid #e0e0e0;
+        .sarab-chat-title {
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1.2;
         }
 
-        #sarab-chat-form { display:flex; border-top:1px solid #eee; }
-        #sarab-chat-input { flex:1; border:none; padding:12px; outline:none; }
-        #sarab-chat-form button { background:var(--sarab-blue); border:none; color:#fff; padding:0 20px; cursor:pointer; }
+        .sarab-chat-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            opacity: 0.95;
+        }
+
+        .sarab-chat-status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #50d890;
+        }
+
+        .sarab-chat-close {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            line-height: 1;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+        }
+
+        .sarab-chat-close:hover {
+            background: rgba(255, 255, 255, 0.14);
+        }
+
+        .sarab-chat-messages {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 11px;
+            background: #101216;
+        }
+
+        .sarab-chat-messages::-webkit-scrollbar {
+            width: 7px;
+        }
+
+        .sarab-chat-messages::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.18);
+            border-radius: 999px;
+        }
+
+        .sarab-msg {
+            max-width: 88%;
+            font-size: 13px;
+            line-height: 1.55;
+            padding: 11px 13px;
+            border-radius: 13px;
+            white-space: pre-wrap;
+        }
+
+        .sarab-msg.bot {
+            align-self: flex-start;
+            background: #171a20;
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            color: #eef2ff;
+        }
+
+        .sarab-msg.user {
+            align-self: flex-end;
+            background: #0f62fe;
+            color: #fff;
+        }
+
+        .sarab-msg a {
+            color: #9fc4ff;
+            text-decoration: underline;
+            font-weight: 600;
+        }
+
+        .sarab-msg a:hover {
+            color: #c7ddff;
+        }
+
+        .sarab-chat-form {
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 12px;
+            display: flex;
+            gap: 8px;
+            background: #0f1115;
+        }
+
+        .sarab-chat-input {
+            flex: 1;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: #171a20;
+            color: #fff;
+            border-radius: 10px;
+            padding: 11px 12px;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .sarab-chat-input::placeholder {
+            color: rgba(255, 255, 255, 0.58);
+        }
+
+        .sarab-chat-input:focus {
+            border-color: rgba(15, 98, 254, 0.8);
+            box-shadow: 0 0 0 2px rgba(15, 98, 254, 0.18);
+        }
+
+        .sarab-chat-send {
+            border: none;
+            border-radius: 10px;
+            background: var(--sarab-blue);
+            color: #fff;
+            padding: 0 16px;
+            font-weight: 600;
+            cursor: pointer;
+            min-width: 74px;
+        }
+
+        .sarab-chat-send:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 600px) {
+            .sarab-chat-box {
+                right: 14px;
+                bottom: 88px;
+                width: calc(100vw - 28px);
+                height: min(560px, calc(100dvh - 106px));
+                max-height: calc(100dvh - 106px);
+            }
+
+            .sarab-chat-launcher {
+                right: 14px;
+                bottom: 14px;
+            }
+        }
+
+        @media (max-height: 700px) {
+            .sarab-chat-box {
+                height: calc(100dvh - 118px);
+                max-height: calc(100dvh - 118px);
+            }
+        }
     </style>
 </head>
 <body>
@@ -93,91 +279,117 @@
     </div>
 </footer>
 
-<!-- Chat HTML -->
-<div id="sarab-chat-toggle">💬</div>
+<button id="sarabChatLauncher" class="sarab-chat-launcher" aria-label="Open chat">Chat</button>
 
-<div id="sarab-chat-box">
+<section id="sarabChatBox" class="sarab-chat-box" aria-label="Sarab Tech chat widget">
     <div class="sarab-chat-header">
-        <div>
-            <strong>Sarab Support</strong><br>
-            <small>Online • AI Assistant</small>
+        <div class="sarab-chat-brand">
+            <span class="sarab-chat-title">SARAB.tech Assistant</span>
+            <span class="sarab-chat-status"><span class="sarab-chat-status-dot"></span>Online</span>
         </div>
-        <span id="sarab-chat-close" style="cursor:pointer;">×</span>
+        <button id="sarabChatClose" class="sarab-chat-close" aria-label="Close chat">×</button>
     </div>
 
-    <div id="sarab-chat-messages"></div>
+    <div id="sarabChatMessages" class="sarab-chat-messages">
+        <div class="sarab-msg bot">Hi! I’m the Sarab assistant. How can I help you today?</div>
+    </div>
 
-    <form id="sarab-chat-form">
-        @csrf
-        <input type="text" id="sarab-chat-input" placeholder="Type your message..." autocomplete="off">
-        <button type="submit">➤</button>
+    <form id="sarabChatForm" class="sarab-chat-form">
+        <input id="sarabChatInput" class="sarab-chat-input" type="text" maxlength="1000" placeholder="Ask a question about SARAB.tech..." autocomplete="off" required>
+        <button id="sarabChatSend" class="sarab-chat-send" type="submit">Send</button>
     </form>
-</div>
+</section>
 
 <script>
-const toggle = document.getElementById('sarab-chat-toggle');
-const box = document.getElementById('sarab-chat-box');
-const closeBtn = document.getElementById('sarab-chat-close');
-const form = document.getElementById('sarab-chat-form');
-const input = document.getElementById('sarab-chat-input');
-const messages = document.getElementById('sarab-chat-messages');
+    (() => {
+        const launcher = document.getElementById('sarabChatLauncher');
+        const chatBox = document.getElementById('sarabChatBox');
+        const closeBtn = document.getElementById('sarabChatClose');
+        const form = document.getElementById('sarabChatForm');
+        const input = document.getElementById('sarabChatInput');
+        const sendBtn = document.getElementById('sarabChatSend');
+        const messages = document.getElementById('sarabChatMessages');
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
-toggle.onclick = () => box.style.display = 'flex';
-closeBtn.onclick = () => box.style.display = 'none';
+        const appendMessage = (text, type, options = {}) => {
+            const bubble = document.createElement('div');
+            bubble.className = `sarab-msg ${type}`;
 
-form.onsubmit = async function(e) {
-    e.preventDefault();
+            if (options.html) {
+                bubble.innerHTML = text;
+            } else {
+                bubble.textContent = text;
+            }
 
-    const text = input.value.trim();
-    if (!text) return;
+            messages.appendChild(bubble);
+            messages.scrollTop = messages.scrollHeight;
+        };
 
-    const userDiv = document.createElement('div');
-    userDiv.classList.add('message-user');
-    userDiv.textContent = text;
-    messages.appendChild(userDiv);
-    messages.scrollTop = messages.scrollHeight;
-    input.value = '';
-
-    const typingDiv = document.createElement('div');
-    typingDiv.classList.add('message-bot');
-    typingDiv.id = 'typing';
-    typingDiv.textContent = 'Typing...';
-    messages.appendChild(typingDiv);
-    messages.scrollTop = messages.scrollHeight;
-
-    try {
-        const response = await fetch('/ai-chat', {
-            method: 'POST',
-            headers: {
-                'Content-Type':'application/json',
-                'X-CSRF-TOKEN':'{{ csrf_token() }}'
-            },
-            body: JSON.stringify({ message: text })
+        launcher.addEventListener('click', () => {
+            chatBox.classList.add('open');
+            input.focus();
         });
 
-        const data = await response.json();
+        closeBtn.addEventListener('click', () => {
+            chatBox.classList.remove('open');
+        });
 
-        const typingEl = document.getElementById('typing');
-        if (typingEl) typingEl.remove();
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
 
-        const botDiv = document.createElement('div');
-        botDiv.classList.add('message-bot');
-        botDiv.textContent = data.reply || "Sorry, something went wrong.";
-        messages.appendChild(botDiv);
-        messages.scrollTop = messages.scrollHeight;
+            const text = input.value.trim();
+            if (!text) {
+                return;
+            }
 
-    } catch(err) {
-        console.error(err);
-        const typingEl = document.getElementById('typing');
-        if (typingEl) typingEl.remove();
+            appendMessage(text, 'user');
+            input.value = '';
+            sendBtn.disabled = true;
+            appendMessage('Assistant is typing…', 'bot');
 
-        const botDiv = document.createElement('div');
-        botDiv.classList.add('message-bot');
-        botDiv.textContent = "Sorry, something went wrong.";
-        messages.appendChild(botDiv);
-        messages.scrollTop = messages.scrollHeight;
-    }
-};
+            const typingBubble = messages.lastElementChild;
+
+            try {
+                const response = await fetch('{{ route('chatbot.message') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: text,
+                        page_url: window.location.href,
+                    }),
+                });
+
+                const data = await response.json();
+                typingBubble.remove();
+
+                appendMessage(data.reply || 'Sorry, I didn’t get that. Could you rephrase your question?', 'bot');
+
+                if (data.redirect && typeof data.redirect === 'string') {
+                    const redirectLabel = data.redirect === '/contact-us' ? 'Contact Us' : 'this page';
+
+                    appendMessage(
+                        `Redirecting you now. <a href="${data.redirect}">Go to ${redirectLabel}</a>`,
+                        'bot',
+                        { html: true }
+                    );
+
+                    setTimeout(() => {
+                        window.location.href = data.redirect;
+                    }, 2200);
+                }
+            } catch (error) {
+                typingBubble.remove();
+                appendMessage('Connection issue. Please try again.', 'bot');
+            } finally {
+                sendBtn.disabled = false;
+                input.focus();
+            }
+        });
+    })();
 </script>
 
 </body>

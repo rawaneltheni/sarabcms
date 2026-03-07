@@ -21,10 +21,8 @@ class ProjectResource extends Resource
 {
     protected static ?string $model = Project::class;
 
-    protected static string|\UnitEnum|null $navigationGroup = null; // Use string, UnitEnum, or null for compatibility
-
-    protected static ?int $navigationSort = 1; // Ensure it appears first
-
+    protected static string|\UnitEnum|null $navigationGroup = 'Projects';
+    protected static ?int $navigationSort = 1;
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     public static function form(Schema $schema): Schema
@@ -40,7 +38,7 @@ class ProjectResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            
         ];
     }
 

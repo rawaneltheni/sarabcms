@@ -2,6 +2,11 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Resources\Homes\HomeResource;
+use App\Filament\Resources\Stats\StatResource;
+use App\Filament\Resources\Abouts\AboutResource;
+use App\Filament\Resources\BlogPosts\BlogPostResource;
+use App\Filament\Resources\ChatSessions\ChatSessionResource;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -38,11 +43,30 @@ class SarabPanelProvider extends PanelProvider
 
             ->navigation(function (NavigationBuilder $builder) {
                 return $builder->groups([
-                    NavigationGroup::make('Projects')
+                    NavigationGroup::make('Sarab')
                         ->items([
-                            \Filament\Navigation\NavigationItem::make('Projects')
+
+                            \Filament\Navigation\NavigationItem::make('Home')
+                                ->url(HomeResource::getUrl('index'))
+                                ->icon('heroicon-o-photo'),
+                                \Filament\Navigation\NavigationItem::make('Projects')
                                 ->url(route('filament.sarab.resources.projects.index'))
                                 ->icon('heroicon-o-folder'),
+                            \Filament\Navigation\NavigationItem::make('Services')
+                                ->url(route('filament.sarab.resources.services.index'))
+                                ->icon('heroicon-o-wrench-screwdriver'),
+                            \Filament\Navigation\NavigationItem::make('Stats')
+                                ->url(StatResource::getUrl('index'))
+                                ->icon('heroicon-o-chart-bar'),
+                            \Filament\Navigation\NavigationItem::make('About')
+                                ->url(AboutResource::getUrl('index'))
+                                ->icon('heroicon-o-information-circle'),
+                            \Filament\Navigation\NavigationItem::make('Blog Posts')
+                                ->url(BlogPostResource::getUrl('index'))
+                                ->icon('heroicon-o-newspaper'),
+                            \Filament\Navigation\NavigationItem::make('Chat Sessions')
+                                ->url(ChatSessionResource::getUrl('index'))
+                                ->icon('heroicon-o-chat-bubble-left-right'),
                         ]),
                 ]);
             })

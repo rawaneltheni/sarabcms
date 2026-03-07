@@ -22,11 +22,11 @@ class ProjectsTable
             ->columns([
                 ImageColumn::make('image_path')
                     ->label('Image')
-                    ->disk('public') // Ensure public disk is used
-                    ->visibility('public') // Ensure public visibility
-                    ->width(50) // Set width to 50px
-                    ->height(50) // Set height to 50px
-                    ->circular(), // Make the image circular
+                    ->disk('public') 
+                    ->visibility('public') 
+                    ->width(50) 
+                    ->height(50) 
+                    ->circular(), 
                 TextColumn::make('title')
                     ->label('Title')
                     ->sortable()->searchable(),

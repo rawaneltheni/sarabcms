@@ -11,7 +11,7 @@ class Project extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'image_path', // Updated to use image_path for image uploads
+        'image_path', 
         'title',
         'slug',
         'category',
