@@ -11,18 +11,19 @@ use App\Models\Stat;
 use App\Models\User;
 use Database\Seeders\PageContentSeeder;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        User::updateOrCreate(
-            ['email' => 'sarab@gmail.com'],
-            [
-                'name' => 'Sarab',
-                'password' => '123456',
-            ]
-        );
+        User::where('email', 'sarab@gmail.com')->delete();
+
+        User::create([
+            'name' => 'Sarab',
+            'email' => 'sarab@gmail.com',
+            'password' => Hash::make('123456'),
+        ]);
 
         Home::updateOrCreate(
             ['order' => 1],
