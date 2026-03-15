@@ -171,6 +171,22 @@
             color: #eef2ff;
         }
 
+        .sarab-msg.human {
+            align-self: flex-start;
+            background: #11312a;
+            border: 1px solid rgba(80, 216, 144, 0.22);
+            color: #eafff4;
+        }
+
+        .sarab-msg.system {
+            align-self: center;
+            max-width: 94%;
+            padding: 8px 12px;
+            font-size: 12px;
+            background: rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.82);
+        }
+
         .sarab-msg.user {
             align-self: flex-end;
             background: #0f62fe;
@@ -232,6 +248,11 @@
             cursor: not-allowed;
         }
 
+        .sarab-chat-status-dot.human {
+            background: #50d890;
+            box-shadow: 0 0 0 4px rgba(80, 216, 144, 0.15);
+        }
+
         @media (max-width: 600px) {
             .sarab-chat-box {
                 right: 14px;
@@ -260,11 +281,12 @@
 <header class="header">
     <div class="header__content__venor">
         <div class="header__logo">
-            <a href="/"><img src="https://sarab.tech/public/images/media/17135578102.png"></a>
+            <a href="{{ url('/') }}"><img src="https://sarab.tech/public/images/media/17135578102.png"></a>
         </div>
         <nav class="header__actions__venor">
-            <a class="header__action-btn" href="/portfolio">Our Portfolio</a>
-            <a class="header__action-btn" href="/contact">Start a Project</a>
+            <a class="header__action-btn" href="{{ route('blog.index') }}">Blog</a>
+            <a class="header__action-btn" href="{{ route('portfolio') }}">Our Portfolio</a>
+            <a class="header__action-btn" href="{{ route('contact-us') }}">Start a Project</a>
         </nav>
     </div>
 </header>
@@ -285,7 +307,7 @@
     <div class="sarab-chat-header">
         <div class="sarab-chat-brand">
             <span class="sarab-chat-title">SARAB.tech Assistant</span>
-            <span class="sarab-chat-status"><span class="sarab-chat-status-dot"></span>Online</span>
+            <span class="sarab-chat-status"><span id="sarabChatStatusDot" class="sarab-chat-status-dot"></span><span id="sarabChatStatusText">AI assistant online</span></span>
         </div>
         <button id="sarabChatClose" class="sarab-chat-close" aria-label="Close chat">×</button>
     </div>
@@ -309,7 +331,14 @@
         const input = document.getElementById('sarabChatInput');
         const sendBtn = document.getElementById('sarabChatSend');
         const messages = document.getElementById('sarabChatMessages');
+        const statusText = document.getElementById('sarabChatStatusText');
+        const statusDot = document.getElementById('sarabChatStatusDot');
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+        let lastSeenLogId = 0;
+        let humanTakeoverActive = false;
+        let activeAgentName = null;
+        const seenServerMessageIds = new Set();
 
         const appendMessage = (text, type, options = {}) => {
             const bubble = document.createElement('div');
@@ -325,9 +354,77 @@
             messages.scrollTop = messages.scrollHeight;
         };
 
+        const updateChatStatus = () => {
+            statusText.textContent = humanTakeoverActive
+                ? `${activeAgentName || 'SARAB team'} joined the chat`
+                : 'AI assistant online';
+
+            statusDot.classList.toggle('human', humanTakeoverActive);
+            launcher.textContent = humanTakeoverActive ? 'Live Chat' : 'Chat';
+            input.placeholder = humanTakeoverActive
+                ? 'Send a message to the SARAB team...'
+                : 'Ask a question about SARAB.tech...';
+        };
+
+        const applySyncPayload = (data) => {
+            humanTakeoverActive = Boolean(data.human_takeover_active);
+            activeAgentName = typeof data.takeover_by === 'string' && data.takeover_by.trim() !== ''
+                ? data.takeover_by.trim()
+                : null;
+
+            if (typeof data.last_log_id === 'number') {
+                lastSeenLogId = Math.max(lastSeenLogId, data.last_log_id);
+            }
+
+            if (Array.isArray(data.messages)) {
+                data.messages.forEach((message) => {
+                    if (!message || typeof message.id !== 'number' || seenServerMessageIds.has(message.id)) {
+                        return;
+                    }
+
+                    seenServerMessageIds.add(message.id);
+
+                    const bubbleType = message.kind === 'human'
+                        ? 'human'
+                        : (message.kind === 'system' ? 'system' : 'bot');
+
+                    appendMessage(message.text || '', bubbleType);
+                });
+            }
+
+            updateChatStatus();
+        };
+
+        const syncChatState = async () => {
+            try {
+                const url = new URL('{{ route('chatbot.sync') }}', window.location.origin);
+                url.searchParams.set('after_log_id', String(lastSeenLogId));
+
+                const response = await fetch(url.toString(), {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                });
+
+                if (!response.ok) {
+                    return;
+                }
+
+                applySyncPayload(await response.json());
+            } catch (error) {
+            }
+        };
+
+        updateChatStatus();
+        syncChatState();
+        window.setInterval(syncChatState, 4000);
+
         launcher.addEventListener('click', () => {
             chatBox.classList.add('open');
             input.focus();
+            syncChatState();
         });
 
         closeBtn.addEventListener('click', () => {
@@ -345,7 +442,7 @@
             appendMessage(text, 'user');
             input.value = '';
             sendBtn.disabled = true;
-            appendMessage('Assistant is typing…', 'bot');
+            appendMessage(humanTakeoverActive ? 'Sending your message to the SARAB team…' : 'Assistant is typing…', humanTakeoverActive ? 'system' : 'bot');
 
             const typingBubble = messages.lastElementChild;
 
@@ -366,7 +463,11 @@
                 const data = await response.json();
                 typingBubble.remove();
 
-                appendMessage(data.reply || 'Sorry, I didn’t get that. Could you rephrase your question?', 'bot');
+                applySyncPayload(data);
+
+                if (typeof data.reply === 'string' && data.reply.trim() !== '') {
+                    appendMessage(data.reply, humanTakeoverActive ? 'human' : 'bot');
+                }
 
                 if (data.redirect && typeof data.redirect === 'string') {
                     const redirectLabel = data.redirect === '/contact-us' ? 'Contact Us' : 'this page';
@@ -381,6 +482,8 @@
                         window.location.href = data.redirect;
                     }, 2200);
                 }
+
+                syncChatState();
             } catch (error) {
                 typingBubble.remove();
                 appendMessage('Connection issue. Please try again.', 'bot');

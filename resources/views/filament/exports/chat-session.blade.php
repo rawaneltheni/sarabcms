@@ -99,6 +99,24 @@
             color: #eaf0ff;
         }
 
+        .human {
+            background: #11312a;
+            border: 1px solid rgba(80,216,144,.18);
+            color: #eafff4;
+        }
+
+        .system-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .system {
+            max-width: 95%;
+            background: rgba(255,255,255,.05);
+            color: #d3dbf3;
+        }
+
         .intent {
             margin-top: 8px;
             font-size: 11px;
@@ -140,20 +158,36 @@
         @else
             <div class="messages">
                 @foreach($logs as $log)
-                    <div class="user-wrap">
-                        <div class="time">{{ optional($log->created_at)->format('Y-m-d H:i:s') }}</div>
-                        <div class="bubble user">{{ $log->user_message }}</div>
-                    </div>
+                    @php($source = data_get($log->meta, 'source'))
 
-                    <div class="bot-wrap">
-                        <div class="bubble bot">{{ $log->bot_reply }}</div>
-                        @if($log->matched_intent)
-                            <div class="intent">Intent: {{ $log->matched_intent }}</div>
-                        @endif
-                        @if($log->redirect_url)
-                            <a class="redirect" href="{{ $log->redirect_url }}">Redirect URL: {{ $log->redirect_url }}</a>
-                        @endif
-                    </div>
+                    @if(filled($log->user_message))
+                        <div class="user-wrap">
+                            <div class="time">{{ optional($log->created_at)->format('Y-m-d H:i:s') }}</div>
+                            <div class="bubble user">{{ $log->user_message }}</div>
+                        </div>
+                    @endif
+
+                    @if(filled($log->bot_reply))
+                        <div class="{{ $source === 'system' ? 'system-wrap' : 'bot-wrap' }}">
+                            @if($source !== 'system')
+                                <div class="time">{{ optional($log->created_at)->format('Y-m-d H:i:s') }}</div>
+                            @endif
+
+                            <div class="bubble {{ $source === 'human-agent' ? 'human' : ($source === 'system' ? 'system' : 'bot') }}">{{ $log->bot_reply }}</div>
+
+                            @if($source === 'human-agent' && data_get($log->meta, 'agent_name'))
+                                <div class="intent">Handled by: {{ data_get($log->meta, 'agent_name') }}</div>
+                            @endif
+
+                            @if($log->matched_intent)
+                                <div class="intent">Intent: {{ $log->matched_intent }}</div>
+                            @endif
+
+                            @if($log->redirect_url)
+                                <a class="redirect" href="{{ $log->redirect_url }}">Redirect URL: {{ $log->redirect_url }}</a>
+                            @endif
+                        </div>
+                    @endif
                 @endforeach
             </div>
         @endif

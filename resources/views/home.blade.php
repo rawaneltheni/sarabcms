@@ -13,7 +13,7 @@
 }
 
 .slider-venor {
-    height: 100vh;
+    height: 100%;
 }
 
 .slider-inner-venor {
@@ -126,6 +126,8 @@
 
 .service-boxes-slider {
     margin-top: 4rem;
+    display: grid;
+    gap: 1.2rem;
 }
 
 .card-parent {
@@ -373,27 +375,29 @@
 
         return asset($trimmed);
     };
+
+    $primarySlide = $slides->first();
 @endphp
 
 <section class="slider-venor-section">
-    <div class="slider-venor owl-carousel">
-        @foreach($slides as $slide)
-        <div class="slider-inner-venor" data-background-image-url="{{ $resolveImageUrl($slide->image) }}" style="background-image: url('{{ $resolveImageUrl($slide->image) }}')">
+    <div class="slider-venor">
+        @if($primarySlide)
+        <div class="slider-inner-venor" data-background-image-url="{{ $resolveImageUrl($primarySlide->image) }}" style="background-image: url('{{ $resolveImageUrl($primarySlide->image) }}')">
             <div class="container">
                 <div class="slider-content">
-                    <h1 class="active">{{ $slide->h1 }}</h1>
-                    <h2 class="active">{{ $slide->h2 }}</h2>
-                    <div class="slider-body active">{!! $slide->body !!}</div>
+                    <h1 class="active">{{ $primarySlide->h1 }}</h1>
+                    <h2 class="active">{{ $primarySlide->h2 }}</h2>
+                    <div class="slider-body active">{!! $primarySlide->body !!}</div>
                     <div class="button-slider-b">
-                        <a href="{{ $slide->btn_link }}" class="btn btn-slider">
-                            <span>{{ $slide->btn_text }}</span>
+                        <a href="{{ $primarySlide->btn_link ?: route('contact-us') }}" class="btn btn-slider">
+                            <span>{{ $primarySlide->btn_text ?: 'Start a Project' }}</span>
                             <svg width="11.4" height="9.2"><use xlink:href="#arrow"></use></svg>
                         </a>
                     </div>
                 </div>
             </div>
         </div>
-        @endforeach
+        @endif
     </div>
 </section>
 
@@ -404,8 +408,8 @@
             <p>We help premium brands <strong>achieve their future</strong> through innovation and creative perspectives. <strong>We grow your company</strong> through proprietary in-house ideas, tested and perfected <strong>over the years.</strong></p>
         </div>
 
-        <div class="service-boxes-slider owl-carousel">
-            @foreach($services as $service)
+        <div class="service-boxes-slider">
+            @forelse($services as $service)
             <div class="card-parent">
                 <div class="card-inner-row">
                     <div class="card featured to-top-left">
@@ -416,7 +420,7 @@
                             <p class="paragraph">{{ $service->description }}</p>
                         </div>
                         <div class="project-button">
-                            <a href="{{ $service->url }}" title="{{ $service->title }}">
+                            <a href="{{ $service->url ?: route('contact-us') }}" title="{{ $service->title }}">
                                 <span>Read more</span>
                                 <svg viewBox="0 0 80 80">
                                     <polyline points="19.89 15.25 64.03 15.25 64.03 59.33"></polyline>
@@ -430,7 +434,25 @@
                     </div>
                 </div>
             </div>
-            @endforeach
+            @empty
+            <div class="card-parent">
+                <div class="card-inner-row">
+                    <div class="card featured to-top-left">
+                        <div class="heading-wrapper">
+                            <h4 class="heading">New services are being prepared</h4>
+                        </div>
+                        <div class="paragraph-wrapper">
+                            <p class="paragraph">Please check back soon, or contact us directly for current offers.</p>
+                        </div>
+                        <div class="project-button">
+                            <a href="{{ route('contact-us') }}" title="Start a project">
+                                <span>Start a project</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endforelse
         </div>
     </div>
 </section>

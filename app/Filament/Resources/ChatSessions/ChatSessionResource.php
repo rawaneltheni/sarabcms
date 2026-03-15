@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ChatSessions;
 
 use App\Filament\Resources\ChatSessions\Pages\ListChatSessions;
+use App\Filament\Resources\ChatSessions\Pages\ManageChatSession;
 use App\Filament\Resources\ChatSessions\Pages\ViewChatSession;
 use App\Filament\Resources\ChatSessions\Schemas\ChatSessionInfolist;
 use App\Filament\Resources\ChatSessions\Tables\ChatSessionsTable;
@@ -47,6 +48,7 @@ class ChatSessionResource extends Resource
     {
         return [
             'index' => ListChatSessions::route('/'),
+            'live' => ManageChatSession::route('/{record}/live'),
             'view' => ViewChatSession::route('/{record}'),
         ];
     }

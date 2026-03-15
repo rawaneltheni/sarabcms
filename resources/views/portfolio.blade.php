@@ -151,15 +151,16 @@
 <div class="portfolio-section-page">
     <div class="container">
         <div class="projects-page-row">
-            @foreach($projects as $index => $project)
+            @forelse($projects as $index => $project)
                 <div class="project-item {{ $index % 2 != 0 ? 'flex-reverse' : '' }}" style="animation-delay: {{ ($index + 1) * 0.1 }}s;">
                     <div class="project_index">
                         {{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}
                     </div>
                     <div class="project__img_container">
                         <div class="image-wrapper">
-                            <img class="img-fluid" src="{{ asset('storage/' . $project->image_path) }}"
-                                 alt="{{ $project->title }}" loading="lazy">
+                            @if($project->image_url)
+                                <img class="img-fluid" src="{{ $project->image_url }}" alt="{{ $project->title }}" loading="lazy">
+                            @endif
                         </div>
                     </div>
                     <div class="project__info_content">
@@ -169,13 +170,25 @@
                             <p>{{ $project->description }}</p>
                         </div>
                         <div class="project-button">
-                            <a href="{{ Route::has('project.details') ? route('project.details', $project->id) : '#' }}" class="explore-btn">
-                                <span>Explore Details</span>
+                            <a href="{{ route('contact-us') }}" class="explore-btn">
+                                <span>Start Similar Project</span>
                             </a>
                         </div>
                     </div>
                 </div>
-            @endforeach
+            @empty
+                <div class="project__info_content" style="text-align:center; margin: 30px auto; max-width: 700px;">
+                    <h2 class="project_title" style="font-size: 2rem;">Portfolio updates are coming soon</h2>
+                    <div class="project_description">
+                        <p>We are preparing new project case studies. Contact us to discuss your product idea today.</p>
+                    </div>
+                    <div class="project-button">
+                        <a href="{{ route('contact-us') }}" class="explore-btn">
+                            <span>Start a Project</span>
+                        </a>
+                    </div>
+                </div>
+            @endforelse
         </div>
     </div>
 </div>

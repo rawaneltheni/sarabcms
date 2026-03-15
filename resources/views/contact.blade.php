@@ -51,6 +51,26 @@
         transition: transform 0.2s ease;
     }
     .btn-style1:hover { transform: translateY(-2px); background: #f0f0f0; }
+
+    .form-alert {
+        border-radius: 10px;
+        padding: 12px 14px;
+        margin-bottom: 16px;
+        font-size: 0.95rem;
+        border: 1px solid transparent;
+    }
+
+    .form-alert.success {
+        background: rgba(80, 216, 144, 0.12);
+        border-color: rgba(80, 216, 144, 0.35);
+        color: #dcfce7;
+    }
+
+    .form-alert.error {
+        background: rgba(248, 113, 113, 0.12);
+        border-color: rgba(248, 113, 113, 0.35);
+        color: #fee2e2;
+    }
 </style>
 
 <div class="breadcrumb-area">
@@ -75,20 +95,30 @@
                 </div>
 
                 <div class="col-md-8">
-                    <form action="#" method="POST">
+                    @if(session('contact_success'))
+                        <div class="form-alert success">{{ session('contact_success') }}</div>
+                    @endif
+
+                    @if($errors->any())
+                        <div class="form-alert error">
+                            {{ $errors->first() }}
+                        </div>
+                    @endif
+
+                    <form action="{{ route('contact.store') }}" method="POST" novalidate>
                         @csrf
                         <div class="row">
                             <div class="col-md-6">
                                 <label class="contact-info-label">Full Name</label>
-                                <input type="text" name="name" placeholder="John Doe" class="form-control" required>
+                                <input type="text" name="name" placeholder="John Doe" class="form-control" value="{{ old('name') }}" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="contact-info-label">Email Address</label>
-                                <input type="email" name="email" placeholder="john@example.com" class="form-control" required>
+                                <input type="email" name="email" placeholder="john@example.com" class="form-control" value="{{ old('email') }}" required>
                             </div>
                         </div>
                         <label class="contact-info-label">Tell us about your project</label>
-                        <textarea name="message" class="form-control" placeholder="What are you looking to build?" rows="5" required></textarea>
+                        <textarea name="message" class="form-control" placeholder="What are you looking to build?" rows="5" required>{{ old('message') }}</textarea>
 
                         <button type="submit" class="btn btn-style1">Send Message</button>
                     </form>

@@ -4,8 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\ChatLog;
 use App\Models\ChatSession;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Client\Response;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -26,14 +27,24 @@ class ChatbotController extends Controller
         $isArabic = $this->containsArabic($message);
         $language = $isArabic ? 'ar' : 'en';
 
+        $existingSession = $this->findSession($sessionId);
+
+        if ($existingSession?->human_takeover_active) {
+            return $this->queueForHuman(
+                session: $existingSession,
+                sessionId: $sessionId,
+                userMessage: $message,
+                language: $language,
+                pageUrl: $pageUrl
+            );
+        }
+
         if (mb_strlen($message) < 2) {
             return $this->respondAndLog(
                 request: $request,
                 sessionId: $sessionId,
                 userMessage: $message,
-                botReply: $isArabic
-                    ? 'عذرًا، ما فهمتش سؤالك. ممكن توضحه أكثر؟'
-                    : 'Sorry, I didn’t get that. Could you rephrase your question?',
+                botReply: $this->unclearInputReply($isArabic),
                 language: $language,
                 pageUrl: $pageUrl,
                 matchedIntent: 'unclear_input'
@@ -57,14 +68,12 @@ class ChatbotController extends Controller
         $apiKey = config('services.gemini.api_key');
         $model = config('services.gemini.model', 'gemini-1.5-flash');
 
-        if (! $apiKey) {
+        if (! filled($apiKey)) {
             return $this->respondAndLog(
                 request: $request,
                 sessionId: $sessionId,
                 userMessage: $message,
-                botReply: $isArabic
-                    ? 'المساعد غير مهيأ بعد. الرجاء إضافة GEMINI_API_KEY في ملف .env.'
-                    : 'Chat assistant is not configured yet. Please set GEMINI_API_KEY in your .env file.',
+                botReply: $this->geminiNotConfiguredReply($isArabic),
                 language: $language,
                 pageUrl: $pageUrl,
                 status: 500,
@@ -72,7 +81,142 @@ class ChatbotController extends Controller
             );
         }
 
-        $systemPrompt = <<<'PROMPT'
+        try {
+            $response = $this->requestGeminiReply($apiKey, $model, $message);
+        } catch (ConnectionException|Throwable $exception) {
+            return $this->respondWithGeminiFailure(
+                request: $request,
+                sessionId: $sessionId,
+                userMessage: $message,
+                language: $language,
+                pageUrl: $pageUrl,
+                isArabic: $isArabic,
+                matchedIntent: 'gemini_connection_error'
+            );
+        }
+
+        if (! $response->successful()) {
+            return $this->respondWithGeminiFailure(
+                request: $request,
+                sessionId: $sessionId,
+                userMessage: $message,
+                language: $language,
+                pageUrl: $pageUrl,
+                isArabic: $isArabic,
+                matchedIntent: 'gemini_http_error'
+            );
+        }
+
+        return $this->respondAndLog(
+            request: $request,
+            sessionId: $sessionId,
+            userMessage: $message,
+            botReply: $this->extractGeminiReply($response, $isArabic),
+            language: $language,
+            pageUrl: $pageUrl,
+            matchedIntent: 'gemini_ai'
+        );
+    }
+
+    public function sync(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'after_log_id' => ['nullable', 'integer', 'min:0'],
+        ]);
+
+        $sessionId = trim((string) $request->session()->get('chat_session_id', ''));
+        $afterLogId = (int) ($validated['after_log_id'] ?? 0);
+
+        if ($sessionId === '') {
+            return $this->emptySyncResponse($afterLogId);
+        }
+
+        $session = $this->findSession($sessionId);
+
+        if (! $session) {
+            return $this->emptySyncResponse($afterLogId, $sessionId);
+        }
+
+        $logs = $session->logs()
+            ->where('id', '>', $afterLogId)
+            ->orderBy('id')
+            ->get();
+
+        return response()->json([
+            'session_id' => $session->session_id,
+            'human_takeover_active' => (bool) $session->human_takeover_active,
+            'takeover_by' => $session->humanTakeoverBy?->name,
+            'last_log_id' => (int) ($logs->max('id') ?? $afterLogId),
+            'messages' => $logs
+                ->filter(fn (ChatLog $log): bool => filled(trim((string) $log->bot_reply)))
+                ->map(function (ChatLog $log): array {
+                    $source = data_get($log->meta, 'source');
+
+                    return [
+                        'id' => $log->id,
+                        'text' => $log->bot_reply,
+                        'kind' => match ($source) {
+                            'human-agent' => 'human',
+                            'system' => 'system',
+                            default => 'assistant',
+                        },
+                        'created_at' => $log->created_at?->toIso8601String(),
+                    ];
+                })
+                ->values(),
+        ]);
+    }
+
+    private function emptySyncResponse(int $afterLogId = 0, ?string $sessionId = null): JsonResponse
+    {
+        return response()->json([
+            'session_id' => $sessionId,
+            'human_takeover_active' => false,
+            'takeover_by' => null,
+            'last_log_id' => $afterLogId,
+            'messages' => [],
+        ]);
+    }
+
+    private function findSession(string $sessionId): ?ChatSession
+    {
+        return ChatSession::query()
+            ->with('humanTakeoverBy')
+            ->where('session_id', $sessionId)
+            ->first();
+    }
+
+    private function unclearInputReply(bool $isArabic): string
+    {
+        return $isArabic
+            ? 'عذرًا، لم أفهم سؤالك. هل يمكنك توضيحه أكثر؟'
+            : 'Sorry, I didn’t get that. Could you rephrase your question?';
+    }
+
+    private function geminiNotConfiguredReply(bool $isArabic): string
+    {
+        return $isArabic
+            ? 'المساعد غير مهيأ بعد. يرجى إضافة GEMINI_API_KEY في ملف .env.'
+            : 'Chat assistant is not configured yet. Please set GEMINI_API_KEY in your .env file.';
+    }
+
+    private function geminiConnectionReply(bool $isArabic): string
+    {
+        return $isArabic
+            ? 'أواجه مشكلة في الاتصال حاليًا. يرجى المحاولة مرة أخرى بعد قليل.'
+            : 'I am having trouble connecting right now. Please try again in a moment.';
+    }
+
+    private function defaultAssistantReply(bool $isArabic): string
+    {
+        return $isArabic
+            ? 'يمكنني مساعدتك في خدمات SARAB.tech، والأعمال السابقة، وتخطيط المشاريع، وطرق التواصل.'
+            : 'I can help with SARAB.tech services, portfolio, project planning, and contact information.';
+    }
+
+    private function buildSystemPrompt(): string
+    {
+        return <<<'PROMPT'
     You are the SARAB.tech assistant.
 
     Conversation start policy:
@@ -87,6 +231,9 @@ class ChatbotController extends Controller
     - If user asks to contact/reach SARAB.tech, guide them to the Contact Us page at /contact-us.
     - Keep responses concise, practical, and friendly.
     - Reply in the same language as the user's question when possible (Arabic or English).
+    - If replying in Arabic, use formal Modern Standard Arabic only.
+    - Avoid Arabic dialects, slang, colloquial phrasing, and informal expressions.
+    - Keep Arabic wording polished, respectful, and professional.
     - Never invent hard facts, numbers, or promises not present in provided knowledge.
 
     Trusted SARAB.tech knowledge:
@@ -98,80 +245,67 @@ class ChatbotController extends Controller
     - Headquarters: Benghazi, Libya.
     - Training: over 50 trainees.
     PROMPT;
+    }
 
-        try {
-            $response = Http::timeout(20)
-                ->withHeaders([
-                    'x-goog-api-key' => $apiKey,
-                ])
-                ->post(
-                    "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent",
-                    [
-                        'systemInstruction' => [
+    private function requestGeminiReply(string $apiKey, string $model, string $message): Response
+    {
+        return Http::timeout(20)
+            ->withHeaders([
+                'x-goog-api-key' => $apiKey,
+            ])
+            ->post(
+                "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent",
+                [
+                    'systemInstruction' => [
+                        'parts' => [
+                            ['text' => $this->buildSystemPrompt()],
+                        ],
+                    ],
+                    'contents' => [
+                        [
+                            'role' => 'user',
                             'parts' => [
-                                ['text' => $systemPrompt],
+                                ['text' => $message],
                             ],
                         ],
-                        'contents' => [
-                            [
-                                'role' => 'user',
-                                'parts' => [
-                                    ['text' => $message],
-                                ],
-                            ],
-                        ],
-                        'generationConfig' => [
-                            'temperature' => 0.4,
-                            'maxOutputTokens' => 350,
-                        ],
-                    ]
-                );
-        } catch (ConnectionException|Throwable $exception) {
-            return $this->respondAndLog(
-                request: $request,
-                sessionId: $sessionId,
-                userMessage: $message,
-                botReply: $isArabic
-                    ? 'أواجه مشكلة اتصال حالياً. حاول مرة أخرى بعد قليل.'
-                    : 'I am having trouble connecting right now. Please try again in a moment.',
-                language: $language,
-                pageUrl: $pageUrl,
-                status: 502,
-                matchedIntent: 'gemini_connection_error'
+                    ],
+                    'generationConfig' => [
+                        'temperature' => 0.4,
+                        'maxOutputTokens' => 350,
+                    ],
+                ]
             );
-        }
+    }
 
-        if (! $response->successful()) {
-            return $this->respondAndLog(
-                request: $request,
-                sessionId: $sessionId,
-                userMessage: $message,
-                botReply: $isArabic
-                    ? 'أواجه مشكلة اتصال حالياً. حاول مرة أخرى بعد قليل.'
-                    : 'I am having trouble connecting right now. Please try again in a moment.',
-                language: $language,
-                pageUrl: $pageUrl,
-                status: 502,
-                matchedIntent: 'gemini_http_error'
-            );
-        }
-
+    private function extractGeminiReply(Response $response, bool $isArabic): string
+    {
         $reply = data_get($response->json(), 'candidates.0.content.parts.0.text');
 
         if (! is_string($reply) || trim($reply) === '') {
-            $reply = $isArabic
-                ? 'يمكنني مساعدتك في خدمات SARAB.tech، والأعمال السابقة، وتخطيط المشاريع، وطرق التواصل.'
-                : 'I can help with SARAB.tech services, portfolio, project planning, and contact information.';
+            return $this->defaultAssistantReply($isArabic);
         }
 
+        return trim($reply);
+    }
+
+    private function respondWithGeminiFailure(
+        Request $request,
+        string $sessionId,
+        string $userMessage,
+        string $language,
+        ?string $pageUrl,
+        bool $isArabic,
+        string $matchedIntent,
+    ): JsonResponse {
         return $this->respondAndLog(
             request: $request,
             sessionId: $sessionId,
-            userMessage: $message,
-            botReply: trim($reply),
+            userMessage: $userMessage,
+            botReply: $this->geminiConnectionReply($isArabic),
             language: $language,
             pageUrl: $pageUrl,
-            matchedIntent: 'gemini_ai'
+            status: 502,
+            matchedIntent: $matchedIntent
         );
     }
 
@@ -202,7 +336,7 @@ class ChatbotController extends Controller
                 'intent' => 'rodood',
                 'patterns' => ['what is rodood', 'rodood', 'ما هو ردود', 'منصة ردود', 'ردود'],
                 'reply' => 'Rodood is the first chatbot-as-a-service platform in Libya, helping businesses automate customer communication, social media engagement, and eCommerce operations using AI.',
-                'ar_reply' => 'Rodood هي أول منصة شات بوت كخدمة في ليبيا، تساعد الشركات على أتمتة تواصل العملاء، والتفاعل عبر السوشيال ميديا، وعمليات التجارة الإلكترونية باستخدام الذكاء الاصطناعي.',
+                'ar_reply' => 'Rodood هي أول منصة لروبوتات المحادثة كخدمة في ليبيا، وتساعد الشركات على أتمتة تواصل العملاء، وتعزيز التفاعل عبر وسائل التواصل الاجتماعي، وإدارة عمليات التجارة الإلكترونية باستخدام الذكاء الاصطناعي.',
             ],
             [
                 'intent' => 'smartbank',
@@ -220,7 +354,7 @@ class ChatbotController extends Controller
                 'intent' => 'service_logic',
                 'patterns' => ['how can i get an app built', 'build an app', 'start app project', 'get your offer', 'كيف ابني تطبيق', 'ابي تطبيق', 'ابدأ مشروع تطبيق', 'احصل على عرض'],
                 'reply' => 'Our expert team designs visually engaging and highly functional websites and mobile apps tailored to your needs. Click “Get Your Offer” to start your project with us.',
-                'ar_reply' => 'فريقنا يصمم مواقع وتطبيقات جوال احترافية وجذابة ومخصصة لاحتياجك. اضغط على "احصل على عرض" لبدء مشروعك معنا.',
+                'ar_reply' => 'يعمل فريقنا على تصميم وتطوير مواقع إلكترونية وتطبيقات جوال احترافية وجذابة، ومصممة بما يلائم احتياجاتك. يرجى الضغط على "احصل على عرض" لبدء مشروعك معنا.',
             ],
             [
                 'intent' => 'training',
@@ -244,7 +378,7 @@ class ChatbotController extends Controller
                 'intent' => 'contact_navigation',
                 'patterns' => ['how can i contact you', 'how do i reach you', 'how can i reach you', 'how can i reach sarab', 'how can i reach sarab tech', 'reach sarab', 'reach sarab tech', 'contact us', 'contact', 'how can i reach', 'كيف اتواصل معكم', 'طريقة التواصل', 'اتصل بنا', 'تواصل', 'كيف اوصل لكم', 'كيف اتواصل مع سراب'],
                 'reply' => 'You can reach us through our Contact Us page. I’ll take you there now.',
-                'ar_reply' => 'تقدر تتواصل معنا عبر صفحة اتصل بنا. سأحوّلك لها الآن.',
+                'ar_reply' => 'يمكنك التواصل معنا عبر صفحة اتصل بنا. سأحوّلك إليها الآن.',
                 'redirect' => '/contact-us',
             ],
         ];
@@ -291,12 +425,7 @@ class ChatbotController extends Controller
             return $newSessionId;
         }
 
-        $inactivityLimitMinutes = 45;
-
-        if (
-            $existingSession->last_message_at &&
-            $existingSession->last_message_at->lt(now()->subMinutes($inactivityLimitMinutes))
-        ) {
+        if ($existingSession->hasEnded()) {
             $newSessionId = (string) Str::uuid();
             $request->session()->put('chat_session_id', $newSessionId);
 
@@ -317,7 +446,7 @@ class ChatbotController extends Controller
         ?string $redirectUrl = null,
         int $status = 200
     ): JsonResponse {
-        $this->storeChatLog(
+        $log = $this->storeChatLog(
             sessionId: $sessionId,
             userMessage: $userMessage,
             botReply: $botReply,
@@ -329,10 +458,15 @@ class ChatbotController extends Controller
             userAgent: $request->userAgent()
         );
 
+        $session = $this->findSession($sessionId);
+
         return response()->json([
             'reply' => $botReply,
             'redirect' => $redirectUrl,
             'session_id' => $sessionId,
+            'last_log_id' => $log?->id,
+            'human_takeover_active' => (bool) $session?->human_takeover_active,
+            'takeover_by' => $session?->humanTakeoverBy?->name,
         ], $status);
     }
 
@@ -346,7 +480,7 @@ class ChatbotController extends Controller
         ?string $redirectUrl,
         ?string $ipAddress,
         ?string $userAgent
-    ): void {
+    ): ?ChatLog {
         try {
             $session = ChatSession::query()->firstOrCreate(
                 ['session_id' => $sessionId],
@@ -359,30 +493,57 @@ class ChatbotController extends Controller
                 ]
             );
 
-            $session->update([
-                'language' => $language,
-                'last_message_at' => now(),
-                'ended_at' => null,
-                'last_page_url' => $pageUrl,
+            $session->forceFill([
                 'ip_address' => $ipAddress,
                 'user_agent' => $userAgent,
-                'messages_count' => $session->messages_count + 1,
-            ]);
+            ])->save();
 
-            ChatLog::query()->create([
-                'chat_session_id' => $session->id,
-                'user_message' => $userMessage,
-                'bot_reply' => $botReply,
-                'language' => $language,
-                'matched_intent' => $matchedIntent,
-                'redirect_url' => $redirectUrl,
-                'page_url' => $pageUrl,
-                'meta' => [
+            return $session->appendLog(
+                userMessage: $userMessage,
+                botReply: $botReply,
+                language: $language,
+                matchedIntent: $matchedIntent,
+                redirectUrl: $redirectUrl,
+                pageUrl: $pageUrl,
+                meta: [
                     'source' => 'website-chat-widget',
                 ],
-            ]);
+            );
         } catch (Throwable $exception) {
+            report($exception);
+
+            return null;
         }
+    }
+
+    private function queueForHuman(
+        ChatSession $session,
+        string $sessionId,
+        string $userMessage,
+        string $language,
+        ?string $pageUrl = null,
+    ): JsonResponse {
+        $log = $session->appendLog(
+            userMessage: $userMessage,
+            botReply: '',
+            language: $language,
+            matchedIntent: 'human_takeover_queue',
+            pageUrl: $pageUrl,
+            meta: [
+                'source' => 'website-chat-widget',
+                'queued_for_human' => true,
+            ],
+        );
+
+        return response()->json([
+            'reply' => null,
+            'redirect' => null,
+            'session_id' => $sessionId,
+            'queued_for_human' => true,
+            'last_log_id' => $log->id,
+            'human_takeover_active' => true,
+            'takeover_by' => $session->humanTakeoverBy?->name,
+        ]);
     }
 
 }
