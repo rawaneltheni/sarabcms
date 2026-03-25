@@ -15,8 +15,8 @@ class ProjectResource extends JsonResource
             'slug' => $this->slug ?? null,
             'category' => $this->category ?? null,
             'description' => $this->description ?? null,
-            'image' => $this->image ?? null,
-            'image_url' => $this->image ? asset('storage/' . $this->image) : null,
+            'image_path' => $this->image_path ?? null,
+            'image_url' => $this->image_url ?? null,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

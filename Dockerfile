@@ -3,6 +3,7 @@ FROM php:8.2-fpm
 
 # Increase PHP-FPM process limits to handle more concurrent requests
 RUN { \
+    echo "listen = 9000"; \
     echo "pm = dynamic"; \
     echo "pm.max_children = 20"; \
     echo "pm.start_servers = 5"; \
@@ -24,5 +25,9 @@ COPY . /var/www
 # Copy composer from official composer image
 COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 
+
 # Set permissions
 RUN chown -R www-data:www-data /var/www
+
+# Ensure the storage symlink exists, but don't fail restarts if it's already present.
+ENTRYPOINT ["sh", "-c", "php artisan storage:link || true; exec php-fpm -F"]

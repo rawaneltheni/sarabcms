@@ -11,8 +11,10 @@ class StatResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'icon' => $this->icon ?? null,
+            'number' => $this->number ?? null,
             'label' => $this->label ?? null,
-            'value' => $this->value ?? null,
+            'order' => $this->order ?? null,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

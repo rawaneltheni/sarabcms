@@ -12,9 +12,12 @@ class ServiceResource extends JsonResource
         return [
             'id' => $this->id,
             'title' => $this->title ?? null,
-            'slug' => $this->slug ?? null,
             'description' => $this->description ?? null,
             'icon' => $this->icon ?? null,
+            'image' => $this->image ?? null,
+            'image_url' => $this->image ? asset('storage/' . $this->image) : null,
+            'url' => $this->url ?? null,
+            'order' => $this->order ?? null,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

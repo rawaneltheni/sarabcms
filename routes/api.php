@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\AboutController;
 use App\Http\Controllers\Api\StatController;
 
 use App\Http\Controllers\ChatbotController;
+use App\Http\Resources\CustomerResource;
+use App\Models\Customer;
 
 Route::get('/projects', [ProjectController::class, 'index']);
 Route::get('/projects/{project}', [ProjectController::class, 'show']);
@@ -28,3 +30,7 @@ Route::get('/stats/{stat}', [StatController::class, 'show']);
 Route::post('/chatbot/message', [ChatbotController::class, 'message'])
 	->middleware('throttle:20,1')
 	->name('chatbot.message');
+
+Route::get('/customers', function () {
+    return CustomerResource::collection(Customer::all());
+});
