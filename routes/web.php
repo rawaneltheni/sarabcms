@@ -16,9 +16,7 @@ Route::get('/contact-us', [ContactController::class, 'index'])->name('contact-us
 Route::post('/contact', [ContactController::class, 'store'])
     ->middleware('throttle:10,1')
     ->name('contact.store');
-Route::post('/chatbot/message', [ChatbotController::class, 'message'])
-	->middleware('throttle:20,1')
-	->name('chatbot.message');
+// Route moved to routes/api.php for stateless API access
 Route::get('/chatbot/sync', [ChatbotController::class, 'sync'])
 	->middleware('throttle:60,1')
 	->name('chatbot.sync');
