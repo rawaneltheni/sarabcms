@@ -27,6 +27,10 @@ class HomeForm
                 TextInput::make('btn_link')
                     ->label('Button Link')
                     ->default('/contact'),
+                TextInput::make('order')
+                    ->numeric()
+                    ->default(0)
+                    ->required(),
             ]);
     }
 }

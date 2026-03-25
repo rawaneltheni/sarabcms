@@ -35,6 +35,16 @@ class DatabaseSeeder extends Seeder
         DB::table('blog_posts')->delete();
         DB::table('customers')->delete();
 
+        Home::create([
+            'image' => null,
+            'h1' => 'SARAB',
+            'h2' => 'TECH',
+            'body' => 'Shaping your digital success story together.',
+            'btn_text' => 'Contact Us',
+            'btn_link' => '/contact',
+            'order' => 1,
+        ]);
+
         About::create([
             'heading1' => 'Empowering Your',
             'heading2' => 'Success Journey.',
@@ -148,6 +158,33 @@ class DatabaseSeeder extends Seeder
                 'slug' => 'fintech-dashboard',
                 'category' => 'Web',
                 'description' => 'A comprehensive financial dashboard providing real-time analytics, transaction monitoring, and customizable reporting for enterprise clients.',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+
+        Customer::insert([
+            [
+                'name' => 'Sarab Client One',
+                'logo_path' => null,
+                'website_url' => null,
+                'order' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Sarab Client Two',
+                'logo_path' => null,
+                'website_url' => null,
+                'order' => 2,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Sarab Client Three',
+                'logo_path' => null,
+                'website_url' => null,
+                'order' => 3,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],

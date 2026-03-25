@@ -18,6 +18,8 @@ class HomesTable
     {
         return $table
             ->columns([
+                TextColumn::make('order')
+                    ->sortable(),
                 ImageColumn::make('image')
                     ->label('Image')
                     ->disk('public')

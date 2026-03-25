@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\ServiceController;
 use App\Http\Controllers\Api\BlogPostController;
 use App\Http\Controllers\Api\AboutController;
+use App\Http\Controllers\Api\HomeController;
 use App\Http\Controllers\Api\StatController;
 
 use App\Http\Controllers\ChatbotController;
@@ -23,6 +24,9 @@ Route::get('/blog-posts/{blogPost}', [BlogPostController::class, 'show']);
 Route::get('/abouts', [AboutController::class, 'index']);
 Route::get('/abouts/{about}', [AboutController::class, 'show']);
 
+Route::get('/homes', [HomeController::class, 'index']);
+Route::get('/homes/{home}', [HomeController::class, 'show']);
+
 Route::get('/stats', [StatController::class, 'index']);
 Route::get('/stats/{stat}', [StatController::class, 'show']);
 
@@ -32,5 +36,5 @@ Route::post('/chatbot/message', [ChatbotController::class, 'message'])
 	->name('chatbot.message');
 
 Route::get('/customers', function () {
-    return CustomerResource::collection(Customer::all());
+    return CustomerResource::collection(Customer::query()->orderBy('order')->get());
 });

@@ -33,10 +33,21 @@ interface AboutContent {
   image3_url: string | null;
 }
 
+interface HomeContent {
+  id: number;
+  h1: string | null;
+  h2: string | null;
+  body: string | null;
+  btn_text: string | null;
+  btn_link: string | null;
+  image_url: string | null;
+}
+
 interface Customer {
   id: number;
   name: string;
   logo_url: string | null;
+  website_url?: string | null;
 }
 
 interface Service {
@@ -66,6 +77,7 @@ function HomePage() {
   const {t, i18n} = useTranslation();
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [home, setHome] = useState<HomeContent | null>(null);
   const [about, setAbout] = useState<AboutContent | null>(null);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [services, setServices] = useState<Service[]>([]);
@@ -93,14 +105,16 @@ function HomePage() {
 
     Promise.all([
       api.get('/projects'),
+      api.get('/homes'),
       api.get('/abouts'),
       api.get('/customers'),
       api.get('/services'),
       api.get('/stats'),
       api.get('/blog-posts'),
     ])
-      .then(([projectsRes, aboutRes, customersRes, servicesRes, statsRes, blogPostsRes]) => {
+      .then(([projectsRes, homesRes, aboutRes, customersRes, servicesRes, statsRes, blogPostsRes]) => {
         const projectItems = projectsRes.data.data || [];
+        const homeItems = homesRes.data.data || [];
         const aboutItems = aboutRes.data.data || [];
 
         setProjects(
@@ -112,6 +126,7 @@ function HomePage() {
             description: project.description ?? null,
           })),
         );
+        setHome(homeItems[0] ?? null);
         setAbout(aboutItems[0] ?? null);
         setCustomers(customersRes.data.data || []);
         setServices(servicesRes.data.data || []);
@@ -121,6 +136,7 @@ function HomePage() {
       })
       .catch(() => {
         setProjects([]);
+        setHome(null);
         setAbout(null);
         setCustomers([]);
         setServices([]);
@@ -154,14 +170,60 @@ function HomePage() {
 
       <section id="home" className="relative z-20 flex h-screen flex-col items-center justify-center pointer-events-none">
         <motion.div
-          initial={{opacity: 0, y: 20}}
+          initial={{opacity: 0, y: 24}}
           animate={{opacity: 1, y: 0}}
-          transition={{duration: 1, delay: 0.8}}
-          className="absolute bottom-32 px-6 text-center pointer-events-auto"
+          transition={{duration: 0.9, delay: 0.4}}
+          className="pointer-events-auto relative z-10 mx-auto flex max-w-6xl flex-col items-center gap-8 px-6 text-center"
         >
-          <p className="soft-text mx-auto max-w-2xl text-lg font-light tracking-wide md:text-2xl">
-            {about?.description || t('hero.subtitle')}
-          </p>
+          {home?.image_url && (
+            <div className="overflow-hidden rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-elevated)]/60 p-2 shadow-[0_0_40px_-10px_rgba(6,182,212,0.25)]">
+              <img
+                src={home.image_url}
+                alt={home.h1 || 'Sarab hero'}
+                className="max-h-40 w-auto rounded-2xl object-cover md:max-h-52"
+                referrerPolicy="no-referrer"
+              />
+            </div>
+          )}
+
+          <div className="space-y-4">
+            <h1 className="text-5xl font-bold tracking-[0.2em] md:text-7xl">
+              {home?.h1 || t('hero.title')}
+              {(home?.h2 || '').trim() && (
+                <>
+                  <br />
+                  <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                    {home?.h2}
+                  </span>
+                </>
+              )}
+            </h1>
+            <p className="soft-text mx-auto max-w-2xl text-lg font-light tracking-wide md:text-2xl">
+              {home?.body || t('hero.subtitle')}
+            </p>
+          </div>
+
+          {home?.btn_text && home?.btn_link && (
+            home.btn_link.startsWith('/') ? (
+              <Link
+                to={home.btn_link}
+                className="cta-button inline-flex items-center gap-2 rounded-full px-8 py-4 text-lg font-semibold transition-transform hover:scale-105"
+              >
+                {home.btn_text}
+                <ArrowRight size={18} className={i18n.language === 'ar' ? 'rotate-180' : ''} />
+              </Link>
+            ) : (
+              <a
+                href={home.btn_link}
+                target="_blank"
+                rel="noreferrer"
+                className="cta-button inline-flex items-center gap-2 rounded-full px-8 py-4 text-lg font-semibold transition-transform hover:scale-105"
+              >
+                {home.btn_text}
+                <ArrowRight size={18} className={i18n.language === 'ar' ? 'rotate-180' : ''} />
+              </a>
+            )
+          )}
         </motion.div>
 
         <motion.div
@@ -243,10 +305,23 @@ function HomePage() {
           {[...Array(2)].map((_, index) => (
             <div key={index} className="flex w-1/2 items-center justify-around">
               {customers.map((customer) => (
-                <div key={customer.id} className="logo-strip-text flex items-center gap-2 text-2xl font-bold uppercase tracking-widest">
-                  {customer.logo_url && <img src={customer.logo_url} alt={customer.name} className="mr-2 inline-block h-8 w-auto" />}
-                  {customer.name}
-                </div>
+                customer.website_url ? (
+                  <a
+                    key={customer.id}
+                    href={customer.website_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="logo-strip-text flex items-center gap-2 text-2xl font-bold uppercase tracking-widest"
+                  >
+                    {customer.logo_url && <img src={customer.logo_url} alt={customer.name} className="mr-2 inline-block h-8 w-auto" />}
+                    {customer.name}
+                  </a>
+                ) : (
+                  <div key={customer.id} className="logo-strip-text flex items-center gap-2 text-2xl font-bold uppercase tracking-widest">
+                    {customer.logo_url && <img src={customer.logo_url} alt={customer.name} className="mr-2 inline-block h-8 w-auto" />}
+                    {customer.name}
+                  </div>
+                )
               ))}
             </div>
           ))}
