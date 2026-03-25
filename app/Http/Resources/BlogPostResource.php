@@ -17,7 +17,7 @@ class BlogPostResource extends JsonResource
             'content' => $this->content ?? null,
             'image' => $this->image ?? null,
             'image_url' => $this->image ? asset('storage/' . $this->image) : null,
-            'published_at' => $this->published_at ?? null,
+            'published_at' => $this->date ?? null,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

@@ -2,11 +2,14 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Resources\CustomerResource;
 use App\Filament\Resources\Homes\HomeResource;
-use App\Filament\Resources\Stats\StatResource;
 use App\Filament\Resources\Abouts\AboutResource;
 use App\Filament\Resources\BlogPosts\BlogPostResource;
 use App\Filament\Resources\ChatSessions\ChatSessionResource;
+use App\Filament\Resources\Projects\ProjectResource;
+use App\Filament\Resources\Services\ServiceResource;
+use App\Filament\Resources\Stats\StatResource;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -39,7 +42,16 @@ class SarabPanelProvider extends PanelProvider
                 'primary' => Color::Blue,
                 'secondary' => Color::Gray,
             ])
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
+            ->resources([
+                HomeResource::class,
+                ProjectResource::class,
+                ServiceResource::class,
+                StatResource::class,
+                AboutResource::class,
+                BlogPostResource::class,
+                CustomerResource::class,
+                ChatSessionResource::class,
+            ])
 
             ->navigation(function (NavigationBuilder $builder) {
                 return $builder->groups([
@@ -49,11 +61,11 @@ class SarabPanelProvider extends PanelProvider
                             \Filament\Navigation\NavigationItem::make('Home')
                                 ->url(HomeResource::getUrl('index'))
                                 ->icon('heroicon-o-photo'),
-                                \Filament\Navigation\NavigationItem::make('Projects')
-                                ->url(route('filament.sarab.resources.projects.index'))
+                            \Filament\Navigation\NavigationItem::make('Projects')
+                                ->url(ProjectResource::getUrl('index'))
                                 ->icon('heroicon-o-folder'),
                             \Filament\Navigation\NavigationItem::make('Services')
-                                ->url(route('filament.sarab.resources.services.index'))
+                                ->url(ServiceResource::getUrl('index'))
                                 ->icon('heroicon-o-wrench-screwdriver'),
                             \Filament\Navigation\NavigationItem::make('Stats')
                                 ->url(StatResource::getUrl('index'))
@@ -64,6 +76,9 @@ class SarabPanelProvider extends PanelProvider
                             \Filament\Navigation\NavigationItem::make('Blog Posts')
                                 ->url(BlogPostResource::getUrl('index'))
                                 ->icon('heroicon-o-newspaper'),
+                            \Filament\Navigation\NavigationItem::make('Customers')
+                                ->url(CustomerResource::getUrl('index'))
+                                ->icon('heroicon-o-user-group'),
                             \Filament\Navigation\NavigationItem::make('Chat Sessions')
                                 ->url(ChatSessionResource::getUrl('index'))
                                 ->icon('heroicon-o-chat-bubble-left-right'),

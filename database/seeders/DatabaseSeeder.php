@@ -5,12 +5,14 @@ namespace Database\Seeders;
 use App\Models\About;
 use App\Models\BlogPost;
 use App\Models\ChatSession;
+use App\Models\Customer;
 use App\Models\Home;
 use App\Models\Project;
 use App\Models\Service;
 use App\Models\Stat;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -18,8 +20,6 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $imagePath = 'images/media/1694258162web.jpg';
-
         User::where('email', 'sarab@gmail.com')->delete();
         User::create([
             'name' => 'Sarab',
@@ -27,73 +27,131 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('123456'),
         ]);
 
-        if (! Home::query()->exists()) {
-            Home::create([
-                'order' => 1,
-                'image' => $imagePath,
-                'h1' => 'Welcome to Sarab Tech',
-                'h2' => 'Build with confidence',
-                'body' => 'This is example homepage slider content seeded for Filament.',
-                'btn_text' => 'Contact us',
-                'btn_link' => '/contact',
-            ]);
-        }
+        DB::table('home_sliders')->delete();
+        DB::table('services')->delete();
+        DB::table('stats')->delete();
+        DB::table('abouts')->delete();
+        DB::table('projects')->delete();
+        DB::table('blog_posts')->delete();
+        DB::table('customers')->delete();
 
-        if (! Service::query()->exists()) {
-            Service::create([
+        About::create([
+            'heading1' => 'Empowering Your',
+            'heading2' => 'Success Journey.',
+            'description' => 'Enhance your online presence with Sarab. Specializing in web and app development, we create seamless, innovative solutions to shape your digital success story together.',
+            'features' => [
+                'Our expert team creates visually captivating and highly functional websites that make a lasting impact.',
+                'We develop cutting-edge mobile apps that deliver seamless experiences and cater to your specific needs.',
+                'Our top priority is exceptional customer service, ensuring your satisfaction every step of the way.',
+            ],
+        ]);
+
+        Service::insert([
+            [
                 'order' => 1,
                 'icon' => 'fa fa-code',
-                'title' => 'Example Service',
-                'description' => 'This is example service content. You can edit it in Filament.',
-                'image' => $imagePath,
+                'title' => 'Web Development',
+                'description' => 'Visually captivating and highly functional websites.',
+                'image' => null,
                 'url' => '/portfolio',
-            ]);
-        }
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'order' => 2,
+                'icon' => 'fa fa-mobile-screen',
+                'title' => 'App Development',
+                'description' => 'Cutting-edge mobile apps that deliver seamless experiences.',
+                'image' => null,
+                'url' => '/portfolio',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'order' => 3,
+                'icon' => 'fa fa-comments',
+                'title' => 'Chatbot Systems',
+                'description' => 'Intelligent conversational agents like rodood.ly.',
+                'image' => null,
+                'url' => '/portfolio',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
 
-        if (! Stat::query()->exists()) {
-            Stat::create([
+        Stat::insert([
+            [
                 'order' => 1,
+                'icon' => 'fa fa-users',
+                'number' => '0',
+                'label' => 'Happy Customers',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'order' => 2,
+                'icon' => 'fa fa-graduation-cap',
+                'number' => '0',
+                'label' => 'Trainees',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'order' => 3,
                 'icon' => 'fa fa-chart-line',
-                'number' => '10',
-                'label' => 'Example Projects',
-            ]);
-        }
+                'number' => '0',
+                'label' => 'Service Users',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'order' => 4,
+                'icon' => 'fa fa-folder-open',
+                'number' => '0',
+                'label' => 'Great Projects',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
 
-        if (! About::query()->exists()) {
-            About::create([
-                'heading1' => 'About Sarab',
-                'heading2' => 'Example about heading',
-                'description' => 'This is example about content seeded for the Filament panel.',
-                'image1' => $imagePath,
-                'image2' => $imagePath,
-                'image3' => $imagePath,
-                'features' => [
-                    'Example feature one',
-                    'Example feature two',
-                ],
-            ]);
-        }
-
-        if (! Project::query()->exists()) {
-            Project::create([
-                'image_path' => $imagePath,
-                'title' => 'Example Project',
-                'slug' => 'example-project',
+        Project::insert([
+            [
+                'image_path' => null,
+                'title' => 'E-Commerce Platform',
+                'slug' => 'e-commerce-platform',
                 'category' => 'Web',
-                'description' => 'This is example project content managed from Filament.',
-            ]);
-        }
-
-        if (! BlogPost::query()->exists()) {
-            BlogPost::create([
-                'title' => 'Example Blog Post',
-                'image' => $imagePath,
-                'slug' => 'example-blog-post',
-                'excerpt' => 'Short example excerpt for seeded blog post.',
-                'date' => now()->toDateString(),
-                'content' => 'This is example blog content. You can replace it from Filament.',
-            ]);
-        }
+                'description' => 'A full-featured e-commerce platform with real-time inventory management, seamless payment gateway integration, and a responsive, mobile-first design.',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'image_path' => null,
+                'title' => 'rodood.ly Chatbot',
+                'slug' => 'rodood-ly-chatbot',
+                'category' => 'Chatbot',
+                'description' => 'An intelligent conversational agent designed to automate customer support, handle inquiries 24/7, and integrate seamlessly with existing CRM systems.',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'image_path' => null,
+                'title' => 'Healthcare App',
+                'slug' => 'healthcare-app',
+                'category' => 'App',
+                'description' => 'A secure and intuitive mobile application for patients to book appointments, access medical records, and consult with doctors via telemedicine.',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'image_path' => null,
+                'title' => 'Fintech Dashboard',
+                'slug' => 'fintech-dashboard',
+                'category' => 'Web',
+                'description' => 'A comprehensive financial dashboard providing real-time analytics, transaction monitoring, and customizable reporting for enterprise clients.',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
 
         if (! ChatSession::query()->exists()) {
             ChatSession::create([
