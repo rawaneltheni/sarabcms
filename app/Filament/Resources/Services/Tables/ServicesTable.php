@@ -36,6 +36,10 @@ class ServicesTable
                     ->label('Description')
                     ->limit(50)
                     ->sortable(),
+                TextColumn::make('url')
+                    ->label('View project link')
+                    ->limit(40)
+                    ->toggleable(),
                 ...TimestampsTableColumns::make(),
             ])
             ->filters([

@@ -19,9 +19,9 @@ use Filament\Tables\Table;
 class LegalPageResource extends Resource
 {
     protected static ?string $model = LegalPage::class;
-    protected static ?string $navigationLabel = 'Important Links';
-    protected static ?string $modelLabel = 'Important link';
-    protected static ?string $pluralModelLabel = 'Important Links';
+    protected static ?string $navigationLabel = 'Legal Pages';
+    protected static ?string $modelLabel = 'Legal page';
+    protected static ?string $pluralModelLabel = 'Legal Pages';
 
     protected static string|\UnitEnum|null $navigationGroup = 'Website CMS';
     protected static ?int $navigationSort = 2;

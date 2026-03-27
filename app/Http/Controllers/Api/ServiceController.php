@@ -10,7 +10,7 @@ class ServiceController extends Controller
 {
     public function index()
     {
-        $services = Service::latest()->get();
+        $services = Service::query()->orderBy('order')->orderBy('id')->get();
         return ServiceResource::collection($services);
     }
 

@@ -6,8 +6,10 @@ use App\Filament\Resources\BlogPosts\BlogPostResource;
 use App\Filament\Resources\AboutUsResource;
 use App\Filament\Resources\ContactUsResource;
 use App\Filament\Resources\FooterResource;
+use App\Filament\Resources\LegalPages\LegalPageResource;
 use App\Filament\Resources\PageBlocks\PageBlockResource;
 use App\Filament\Resources\Projects\ProjectResource;
+use App\Filament\Resources\Services\ServiceResource;
 use App\Filament\Resources\SocialLinksResource;
 use App\Filament\Resources\Stats\StatResource;
 use Filament\Http\Middleware\Authenticate;
@@ -47,10 +49,12 @@ class SarabPanelProvider extends PanelProvider
                 StatResource::class,
                 BlogPostResource::class,
                 PageBlockResource::class,
+                ServiceResource::class,
                 AboutUsResource::class,
                 ContactUsResource::class,
                 FooterResource::class,
                 SocialLinksResource::class,
+                LegalPageResource::class,
             ])
 
             ->navigation(function (NavigationBuilder $builder) {
@@ -66,9 +70,15 @@ class SarabPanelProvider extends PanelProvider
                             \Filament\Navigation\NavigationItem::make('Projects')
                                 ->url(ProjectResource::getUrl('index'))
                                 ->icon('heroicon-o-folder'),
+                            \Filament\Navigation\NavigationItem::make('Service Cards')
+                                ->url(ServiceResource::getUrl('index'))
+                                ->icon('heroicon-o-wrench-screwdriver'),
                             \Filament\Navigation\NavigationItem::make('Blogs')
                                 ->url(BlogPostResource::getUrl('index'))
                                 ->icon('heroicon-o-newspaper'),
+                            \Filament\Navigation\NavigationItem::make('Legal Pages')
+                                ->url(LegalPageResource::getUrl('index'))
+                                ->icon('heroicon-o-document-text'),
                             \Filament\Navigation\NavigationItem::make('About Us')
                                 ->url(AboutUsResource::getUrl('index'))
                                 ->icon('heroicon-o-information-circle'),

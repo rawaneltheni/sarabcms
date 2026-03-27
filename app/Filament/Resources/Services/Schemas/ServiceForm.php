@@ -25,8 +25,8 @@ class ServiceForm
                             ->label('Title')
                             ->required(),
                         TextInput::make('url')
-                            ->label('Button link / WhatsApp URL')
-                            ->helperText('Use `/contact`, a WhatsApp link, or any external URL.'),
+                            ->label('View project link')
+                            ->helperText('Use a live URL like `https://example.com` or an internal path like `/contact`.'),
                         TextInput::make('order')
                             ->label('Display order')
                             ->numeric()
