@@ -9,12 +9,6 @@ export default function Footer() {
   const { t } = useTranslation();
   const { theme } = useTheme();
   const settings = useSiteSettings();
-  const links = [
-    { label: 'Facebook', url: settings?.facebook_url },
-    { label: 'X / Twitter', url: settings?.twitter_url },
-    { label: 'Instagram', url: settings?.instagram_url },
-    { label: 'LinkedIn', url: settings?.linkedin_url },
-  ].filter((link) => link.url && link.url !== '#');
 
   return (
     <footer className="footer-surface relative z-20 border-t py-16">
@@ -37,18 +31,12 @@ export default function Footer() {
         <div>
           <h4 className="text-lg font-semibold mb-6 uppercase tracking-wider">{settings?.footer_links_heading || t('footer.important_links')}</h4>
           <ul className="space-y-4 muted-text">
-            {links.map((link) => (
-              <li key={link.label}>
-                <a
-                  href={link.url ?? '#'}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="hover:text-cyan-400 transition-colors"
-                >
-                  {link.label}
-                </a>
-              </li>
-            ))}
+            <li><Link to="/terms" className="hover:text-cyan-400 transition-colors">{settings?.footer_terms_label || t('footer.terms')}</Link></li>
+            <li><Link to="/privacy" className="hover:text-cyan-400 transition-colors">{settings?.footer_privacy_label || t('footer.privacy')}</Link></li>
+            <li><Link to="/refund" className="hover:text-cyan-400 transition-colors">{settings?.footer_refund_label || t('footer.refund')}</Link></li>
+            <li><Link to="/cancellation" className="hover:text-cyan-400 transition-colors">{settings?.footer_cancellation_label || t('footer.cancelation')}</Link></li>
+            <li><Link to="/promotions" className="hover:text-cyan-400 transition-colors">{settings?.footer_promotions_label || t('footer.promotions')}</Link></li>
+            <li><Link to="/security" className="hover:text-cyan-400 transition-colors">{settings?.footer_security_label || t('footer.security')}</Link></li>
           </ul>
         </div>
       </div>

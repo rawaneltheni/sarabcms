@@ -23,14 +23,25 @@ export default function Header() {
   const navItems = [
     { hash: 'home', label: settings?.header_home_label || t('header.home') },
     { hash: 'about-us', label: settings?.header_about_label || t('header.about') },
-    { hash: 'services', label: settings?.header_services_label || t('header.pricing') },
+    { path: '/pricing', label: settings?.header_services_label || t('header.pricing') },
     { hash: 'portfolio', label: settings?.header_portfolio_label || t('header.portfolio') },
     { hash: 'blog', label: settings?.header_blog_label || t('header.blog') }
   ];
 
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, hash: string) => {
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, item: { hash?: string; path?: string }) => {
     e.preventDefault();
     setIsOpen(false);
+
+    if (item.path) {
+      navigate(item.path);
+      return;
+    }
+
+    const hash = item.hash;
+
+    if (!hash) {
+      return;
+    }
     
     if (location.pathname !== '/') {
       navigate(`/#${hash}`);
@@ -91,10 +102,10 @@ export default function Header() {
           <nav className="flex flex-col gap-6 mb-12">
             {navItems.map((item) => (
               <a 
-                key={item.hash} 
-                href={`#${item.hash}`} 
+                key={item.hash || item.path} 
+                href={item.path || `#${item.hash}`} 
                 className="text-4xl md:text-5xl font-bold hover:text-cyan-400 transition-colors" 
-                onClick={(e) => handleNavClick(e, item.hash)}
+                onClick={(e) => handleNavClick(e, item)}
               >
                 {item.label}
               </a>
