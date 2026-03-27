@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\BlogPosts\Schemas;
 
 use App\Filament\Schemas\Components\SharedFileUpload;
+use App\Support\PlainText;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
@@ -26,9 +27,13 @@ class BlogPostForm
                 SharedFileUpload::make('image', 'Image', 'blog'),
                 Textarea::make('excerpt')
                     ->label('Excerpt')
+                    ->formatStateUsing(fn (?string $state): ?string => PlainText::clean($state))
+                    ->dehydrateStateUsing(fn (?string $state): ?string => PlainText::clean($state))
                     ->columnSpanFull(),
                 Textarea::make('content')
                     ->label('Content')
+                    ->formatStateUsing(fn (?string $state): ?string => PlainText::clean($state))
+                    ->dehydrateStateUsing(fn (?string $state): ?string => PlainText::clean($state))
                     ->columnSpanFull(),
             ]);
     }

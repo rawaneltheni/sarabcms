@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\BlogController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PortfolioController;
@@ -16,7 +15,3 @@ Route::get('/contact-us', [ContactController::class, 'index'])->name('contact-us
 Route::post('/contact', [ContactController::class, 'store'])
     ->middleware('throttle:10,1')
     ->name('contact.store');
-// Route moved to routes/api.php for stateless API access
-Route::get('/chatbot/sync', [ChatbotController::class, 'sync'])
-	->middleware('throttle:60,1')
-	->name('chatbot.sync');

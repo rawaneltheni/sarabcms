@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\BlogPosts\Schemas;
 
+use App\Support\PlainText;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
@@ -16,8 +17,12 @@ class BlogPostInfolist
                 TextEntry::make('slug'),
                 TextEntry::make('date')->date(),
                 ImageEntry::make('image'),
-                TextEntry::make('excerpt')->columnSpanFull(),
-                TextEntry::make('content')->columnSpanFull(),
+                TextEntry::make('excerpt')
+                    ->formatStateUsing(fn (?string $state): ?string => PlainText::clean($state))
+                    ->columnSpanFull(),
+                TextEntry::make('content')
+                    ->formatStateUsing(fn (?string $state): ?string => PlainText::clean($state))
+                    ->columnSpanFull(),
                 TextEntry::make('updated_at')->dateTime(),
             ]);
     }

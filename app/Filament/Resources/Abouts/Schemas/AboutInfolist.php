@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Abouts\Schemas;
 
+use App\Support\PlainText;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
@@ -14,7 +15,9 @@ class AboutInfolist
             ->components([
                 TextEntry::make('heading1'),
                 TextEntry::make('heading2'),
-                TextEntry::make('description')->columnSpanFull(),
+                TextEntry::make('description')
+                    ->formatStateUsing(fn (?string $state): ?string => PlainText::clean($state))
+                    ->columnSpanFull(),
                 TextEntry::make('features')
                     ->formatStateUsing(fn ($state): string => is_array($state) ? implode(', ', $state) : '')
                     ->label('Features')

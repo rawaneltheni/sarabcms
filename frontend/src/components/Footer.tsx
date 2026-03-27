@@ -2,11 +2,19 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import logoImg from '../assets/white-no-text.png';
+import { useSiteSettings } from '../hooks/useSiteSettings';
 import { useTheme } from './ThemeProvider';
 
 export default function Footer() {
   const { t } = useTranslation();
   const { theme } = useTheme();
+  const settings = useSiteSettings();
+  const links = [
+    { label: 'Facebook', url: settings?.facebook_url },
+    { label: 'X / Twitter', url: settings?.twitter_url },
+    { label: 'Instagram', url: settings?.instagram_url },
+    { label: 'LinkedIn', url: settings?.linkedin_url },
+  ].filter((link) => link.url && link.url !== '#');
 
   return (
     <footer className="footer-surface relative z-20 border-t py-16">
@@ -23,23 +31,29 @@ export default function Footer() {
             </Link>
           </div>
           <p className="muted-text max-w-sm">
-            {t('about.desc')}
+            {settings?.footer_description || t('about.desc')}
           </p>
         </div>
         <div>
-          <h4 className="text-lg font-semibold mb-6 uppercase tracking-wider">{t('footer.important_links')}</h4>
+          <h4 className="text-lg font-semibold mb-6 uppercase tracking-wider">{settings?.footer_links_heading || t('footer.important_links')}</h4>
           <ul className="space-y-4 muted-text">
-            <li><Link to="/terms" className="hover:text-cyan-400 transition-colors">{t('footer.terms')}</Link></li>
-            <li><Link to="/privacy" className="hover:text-cyan-400 transition-colors">{t('footer.privacy')}</Link></li>
-            <li><Link to="/refund" className="hover:text-cyan-400 transition-colors">{t('footer.refund')}</Link></li>
-            <li><Link to="/cancellation" className="hover:text-cyan-400 transition-colors">{t('footer.cancelation')}</Link></li>
-            <li><Link to="/promotions" className="hover:text-cyan-400 transition-colors">{t('footer.promotions')}</Link></li>
-            <li><Link to="/security" className="hover:text-cyan-400 transition-colors">{t('footer.security')}</Link></li>
+            {links.map((link) => (
+              <li key={link.label}>
+                <a
+                  href={link.url ?? '#'}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:text-cyan-400 transition-colors"
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))}
           </ul>
         </div>
       </div>
       <div className="max-w-6xl mx-auto px-6 mt-16 pt-8 border-t border-[var(--border-subtle)] text-center faint-text text-sm">
-        &copy; {new Date().getFullYear()} {t('header.title')}. All rights reserved.
+        &copy; {new Date().getFullYear()} {settings?.site_name || t('header.title')}. All rights reserved.
       </div>
     </footer>
   );

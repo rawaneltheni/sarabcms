@@ -39,8 +39,8 @@ const resources = {
         "web_dev_desc": "Visually captivating and highly functional websites.",
         "app_dev": "App Development",
         "app_dev_desc": "Cutting-edge mobile apps that deliver seamless experiences.",
-        "chatbot": "Chatbot Systems",
-        "chatbot_desc": "Intelligent conversational agents like rodood.ly."
+        "consulting": "Technical Consulting",
+        "consulting_desc": "Strategic guidance for planning, scaling, and improving digital products."
       },
       "figures": {
         "subtitle": "Sarab in numbers",
@@ -68,9 +68,9 @@ const resources = {
           "desc": "A full-featured e-commerce platform with real-time inventory management, seamless payment gateway integration, and a responsive, mobile-first design."
         },
         "2": {
-          "title": "rodood.ly Chatbot",
-          "category": "AI & Chatbots",
-          "desc": "An intelligent conversational agent designed to automate customer support, handle inquiries 24/7, and integrate seamlessly with existing CRM systems."
+          "title": "Product Strategy Sprint",
+          "category": "Consulting",
+          "desc": "A focused discovery engagement that turns business goals into a clear roadmap, priorities, and execution plan."
         },
         "3": {
           "title": "Healthcare App",
@@ -134,8 +134,8 @@ const resources = {
         "web_dev_desc": "مواقع ويب جذابة بصريًا وعالية الأداء.",
         "app_dev": "تطوير التطبيقات",
         "app_dev_desc": "تطبيقات هواتف محمولة متطورة تقدم تجارب سلسة.",
-        "chatbot": "أنظمة الدردشة الآلية",
-        "chatbot_desc": "وكلاء محادثة أذكياء مثل ردود.لي."
+        "consulting": "الاستشارات التقنية",
+        "consulting_desc": "إرشاد استراتيجي لتخطيط المنتجات الرقمية وتطويرها وتحسينها."
       },
       "figures": {
         "subtitle": "سراب في أرقام",
@@ -163,9 +163,9 @@ const resources = {
           "desc": "منصة تجارة إلكترونية متكاملة الميزات مع إدارة المخزون في الوقت الفعلي، وتكامل سلس لبوابة الدفع، وتصميم متجاوب يركز على الهاتف المحمول."
         },
         "2": {
-          "title": "روبوت محادثة ردود.لي",
-          "category": "الذكاء الاصطناعي وروبوتات المحادثة",
-          "desc": "وكيل محادثة ذكي مصمم لأتمتة دعم العملاء، والتعامل مع الاستفسارات على مدار الساعة طوال أيام الأسبوع، والتكامل بسلاسة مع أنظمة إدارة علاقات العملاء الحالية."
+          "title": "جلسة استراتيجية للمنتج",
+          "category": "الاستشارات",
+          "desc": "جلسة اكتشاف مركزة تحول أهداف العمل إلى خارطة طريق واضحة وأولويات عملية وخطة تنفيذ مناسبة."
         },
         "3": {
           "title": "تطبيق رعاية صحية",

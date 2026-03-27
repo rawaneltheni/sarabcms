@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Homes\Schemas;
 
 use App\Filament\Schemas\Components\TimestampsInfolistEntries;
+use App\Support\PlainText;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
@@ -17,6 +18,7 @@ class HomeInfolist
                 TextEntry::make('h1'),
                 TextEntry::make('h2'),
                 TextEntry::make('body')
+                    ->formatStateUsing(fn (?string $state): ?string => PlainText::clean($state))
                     ->columnSpanFull(),
                 TextEntry::make('btn_text'),
                 TextEntry::make('btn_link'),

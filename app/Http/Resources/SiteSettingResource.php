@@ -1,0 +1,80 @@
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class SiteSettingResource extends JsonResource
+{
+    public function toArray(Request $request): array
+    {
+        return [
+            'site_name' => $this->site_name,
+            'address' => $this->address,
+            'header_home_label' => $this->header_home_label,
+            'header_about_label' => $this->header_about_label,
+            'header_services_label' => $this->header_services_label,
+            'header_portfolio_label' => $this->header_portfolio_label,
+            'header_blog_label' => $this->header_blog_label,
+            'contact_email' => $this->contact_email,
+            'contact_phone' => $this->contact_phone,
+            'contact_heading' => $this->contact_heading,
+            'contact_description' => $this->contact_description,
+            'contact_information_heading' => $this->contact_information_heading,
+            'contact_form_heading' => $this->contact_form_heading,
+            'contact_form_submit_label' => $this->contact_form_submit_label,
+            'contact_address_label' => $this->contact_address_label,
+            'contact_email_label' => $this->contact_email_label,
+            'contact_phone_label' => $this->contact_phone_label,
+            'contact_back_label' => $this->contact_back_label,
+            'contact_first_name_label' => $this->contact_first_name_label,
+            'contact_last_name_label' => $this->contact_last_name_label,
+            'contact_email_input_label' => $this->contact_email_input_label,
+            'contact_subject_label' => $this->contact_subject_label,
+            'contact_message_label' => $this->contact_message_label,
+            'contact_first_name_placeholder' => $this->contact_first_name_placeholder,
+            'contact_last_name_placeholder' => $this->contact_last_name_placeholder,
+            'contact_email_placeholder' => $this->contact_email_placeholder,
+            'contact_subject_placeholder' => $this->contact_subject_placeholder,
+            'contact_message_placeholder' => $this->contact_message_placeholder,
+            'project_prompt' => $this->project_prompt,
+            'lets_talk_label' => $this->lets_talk_label,
+            'footer_description' => $this->footer_description,
+            'footer_links_heading' => $this->footer_links_heading,
+            'footer_terms_label' => $this->footer_terms_label,
+            'footer_privacy_label' => $this->footer_privacy_label,
+            'footer_refund_label' => $this->footer_refund_label,
+            'footer_cancellation_label' => $this->footer_cancellation_label,
+            'footer_promotions_label' => $this->footer_promotions_label,
+            'footer_security_label' => $this->footer_security_label,
+            'hero_scroll_label' => $this->hero_scroll_label,
+            'about_section_label' => $this->about_section_label,
+            'customers_section_label' => $this->customers_section_label,
+            'services_section_label' => $this->services_section_label,
+            'services_section_title' => $this->services_section_title,
+            'figures_section_label' => $this->figures_section_label,
+            'figures_section_title' => $this->figures_section_title,
+            'figures_section_description' => $this->figures_section_description,
+            'portfolio_section_label' => $this->portfolio_section_label,
+            'portfolio_section_title' => $this->portfolio_section_title,
+            'portfolio_view_details_label' => $this->portfolio_view_details_label,
+            'blog_section_label' => $this->blog_section_label,
+            'blog_section_title' => $this->blog_section_title,
+            'blog_section_description' => $this->blog_section_description,
+            'blog_back_label' => $this->blog_back_label,
+            'blog_read_more_label' => $this->blog_read_more_label,
+            'blog_more_title' => $this->blog_more_title,
+            'blog_more_description' => $this->blog_more_description,
+            'blog_cta_label' => $this->blog_cta_label,
+            'contact_cta_title' => $this->contact_cta_title,
+            'contact_cta_description' => $this->contact_cta_description,
+            'contact_cta_button_label' => $this->contact_cta_button_label,
+            'facebook_url' => $this->facebook_url,
+            'twitter_url' => $this->twitter_url,
+            'instagram_url' => $this->instagram_url,
+            'linkedin_url' => $this->linkedin_url,
+            'map_embed_url' => $this->map_embed_url,
+        ];
+    }
+}

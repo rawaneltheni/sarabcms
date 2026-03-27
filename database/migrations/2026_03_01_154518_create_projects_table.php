@@ -14,7 +14,7 @@ return new class extends Migration
             $table->string('image_path')->nullable();
             $table->string('title')->nullable();
             $table->string('slug')->nullable()->unique();
-            $table->enum('category', ['App', 'Web', 'Chatbot'])->nullable();
+            $table->enum('category', ['App', 'Web', 'Consulting'])->nullable();
             $table->text('description')->nullable();
             $table->timestamps();
             $table->softDeletes();

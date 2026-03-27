@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Abouts\Schemas;
 
 use App\Filament\Schemas\Components\SharedFileUpload;
+use App\Support\PlainText;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
@@ -21,6 +22,8 @@ class AboutForm
                     ->label('Heading 2'),
                 Textarea::make('description')
                     ->label('Description')
+                    ->formatStateUsing(fn (?string $state): ?string => PlainText::clean($state))
+                    ->dehydrateStateUsing(fn (?string $state): ?string => PlainText::clean($state))
                     ->required()
                     ->columnSpanFull(),
                 TagsInput::make('features')

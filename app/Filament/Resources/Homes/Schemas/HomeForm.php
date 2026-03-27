@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Homes\Schemas;
 
 use App\Filament\Schemas\Components\SharedFileUpload;
+use App\Support\PlainText;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Schema;
@@ -20,6 +21,8 @@ class HomeForm
                     ->label('Title 2'),
                 Textarea::make('body')
                     ->label('Description')
+                    ->formatStateUsing(fn (?string $state): ?string => PlainText::clean($state))
+                    ->dehydrateStateUsing(fn (?string $state): ?string => PlainText::clean($state))
                     ->columnSpanFull(),
                 TextInput::make('btn_text')
                     ->label('Button Text')

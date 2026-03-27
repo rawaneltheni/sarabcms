@@ -3,6 +3,7 @@ import { Menu, X, Facebook, Twitter, Instagram, Linkedin, MapPin, Moon, Sun } fr
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import logoImg from '../assets/white-no-text.png';
+import { useSiteSettings } from '../hooks/useSiteSettings';
 import { useTheme } from './ThemeProvider';
 
 export default function Header() {
@@ -11,6 +12,7 @@ export default function Header() {
   const location = useLocation();
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const settings = useSiteSettings();
 
   const toggleLanguage = () => {
     const newLang = i18n.language === 'en' ? 'ar' : 'en';
@@ -19,11 +21,11 @@ export default function Header() {
   };
 
   const navItems = [
-    { key: 'home', hash: 'home' },
-    { key: 'about', hash: 'about-us' },
-    { key: 'pricing', hash: 'services' },
-    { key: 'portfolio', hash: 'portfolio' },
-    { key: 'blog', hash: 'blog' }
+    { hash: 'home', label: settings?.header_home_label || t('header.home') },
+    { hash: 'about-us', label: settings?.header_about_label || t('header.about') },
+    { hash: 'services', label: settings?.header_services_label || t('header.pricing') },
+    { hash: 'portfolio', label: settings?.header_portfolio_label || t('header.portfolio') },
+    { hash: 'blog', label: settings?.header_blog_label || t('header.blog') }
   ];
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, hash: string) => {
@@ -32,7 +34,6 @@ export default function Header() {
     
     if (location.pathname !== '/') {
       navigate(`/#${hash}`);
-      // Small delay to allow navigation to complete before scrolling
       setTimeout(() => {
         document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth' });
       }, 100);
@@ -75,7 +76,6 @@ export default function Header() {
         </div>
       </header>
 
-      {/* Fullscreen Menu Overlay (Snackbar/Drawer) */}
       <div 
         className={`menu-overlay fixed inset-0 z-50 transition-all duration-500 flex flex-col ${
           isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
@@ -91,46 +91,46 @@ export default function Header() {
           <nav className="flex flex-col gap-6 mb-12">
             {navItems.map((item) => (
               <a 
-                key={item.key} 
+                key={item.hash} 
                 href={`#${item.hash}`} 
                 className="text-4xl md:text-5xl font-bold hover:text-cyan-400 transition-colors" 
                 onClick={(e) => handleNavClick(e, item.hash)}
               >
-                {t(`header.${item.key}`)}
+                {item.label}
               </a>
             ))}
           </nav>
 
           <div className="space-y-8 max-w-md w-full border-t border-[var(--border-subtle)] pt-12">
             <div>
-              <h4 className="muted-text uppercase tracking-widest text-sm mb-4">{t('header.project_prompt')}</h4>
+              <h4 className="muted-text uppercase tracking-widest text-sm mb-4">{settings?.project_prompt || t('header.project_prompt')}</h4>
               <Link 
                 to="/contact" 
                 onClick={() => setIsOpen(false)} 
                 className="text-2xl font-semibold hover:text-cyan-400 transition-colors"
               >
-                {t('header.lets_talk')}
+                {settings?.lets_talk_label || t('header.lets_talk')}
               </Link>
             </div>
 
             <div className="flex justify-center gap-6">
-              <a href="https://www.facebook.com/sarabtechllc/" className="social-link">
+              <a href={settings?.facebook_url || 'https://www.facebook.com/sarabtechllc/'} className="social-link">
                 <Facebook size={20} />
               </a>
-              <a href="#" className="social-link">
+              <a href={settings?.twitter_url || '#'} className="social-link">
                 <Twitter size={20} />
               </a>
-              <a href="#" className="social-link">
+              <a href={settings?.instagram_url || '#'} className="social-link">
                 <Instagram size={20} />
               </a>
-              <a href="#" className="social-link">
+              <a href={settings?.linkedin_url || '#'} className="social-link">
                 <Linkedin size={20} />
               </a>
             </div>
 
             <div className="flex items-center justify-center gap-3 muted-text">
               <MapPin size={20} className="text-cyan-400 shrink-0" />
-              <span className="text-sm" dir="ltr">{t('header.address')}</span>
+              <span className="text-sm" dir="ltr">{settings?.address || t('header.address')}</span>
             </div>
           </div>
         </div>

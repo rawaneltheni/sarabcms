@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Projects\Schemas;
 
 use App\Filament\Schemas\Components\SharedFileUpload;
+use App\Support\PlainText;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
@@ -32,7 +33,9 @@ class ProjectForm
                     ]),
 
                 Textarea::make('description')
-                    ->label('Description'),
+                    ->label('Description')
+                    ->formatStateUsing(fn (?string $state): ?string => PlainText::clean($state))
+                    ->dehydrateStateUsing(fn (?string $state): ?string => PlainText::clean($state)),
             ]);
     }
 }

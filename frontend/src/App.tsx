@@ -21,6 +21,9 @@ import CancellationPolicy from './components/CancellationPolicy';
 import PromotionsTerms from './components/PromotionsTerms';
 import SecurityPolicy from './components/SecurityPolicy';
 import ContactPage from './components/ContactPage';
+import BlogPostPage from './components/BlogPostPage';
+import {useSiteSettings} from './hooks/useSiteSettings';
+import {usePageBlocks} from './hooks/usePageBlocks';
 
 interface AboutContent {
   id: number;
@@ -75,6 +78,8 @@ interface BlogPost {
 
 function HomePage() {
   const {t, i18n} = useTranslation();
+  const settings = useSiteSettings();
+  const pageBlocks = usePageBlocks('home');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
   const [home, setHome] = useState<HomeContent | null>(null);
@@ -147,10 +152,26 @@ function HomePage() {
       .finally(() => setLoading(false));
   }, []);
 
+  const blockMap = Object.fromEntries(pageBlocks.map((block) => [block.key, block]));
+  const heroBlock = blockMap.hero;
+  const aboutBlock = blockMap.about;
+  const servicesBlock = blockMap.services;
+  const statsBlock = blockMap.stats;
+  const portfolioBlock = blockMap.portfolio;
+  const blogBlock = blockMap.blog;
+  const contactCtaBlock = blockMap.contact_cta;
+  const aboutBlockFeatures = [
+    aboutBlock?.meta?.feature_1,
+    aboutBlock?.meta?.feature_2,
+    aboutBlock?.meta?.feature_3,
+  ].filter(Boolean) as string[];
+
   const aboutFeatures =
     about?.features?.length
       ? about.features
-      : [t('about.point_1'), t('about.point_2'), t('about.point_3')];
+      : aboutBlockFeatures.length
+        ? aboutBlockFeatures
+        : [t('about.point_1'), t('about.point_2'), t('about.point_3')];
 
   const aboutGallery = [about?.image1_url, about?.image2_url, about?.image3_url].filter(Boolean) as string[];
 
@@ -188,38 +209,38 @@ function HomePage() {
 
           <div className="space-y-4">
             <h1 className="text-5xl font-bold tracking-[0.2em] md:text-7xl">
-              {home?.h1 || t('hero.title')}
+              {heroBlock?.title || home?.h1 || t('hero.title')}
               {(home?.h2 || '').trim() && (
                 <>
                   <br />
                   <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                    {home?.h2}
+                    {heroBlock?.subtitle || home?.h2}
                   </span>
                 </>
               )}
             </h1>
             <p className="soft-text mx-auto max-w-2xl text-lg font-light tracking-wide md:text-2xl">
-              {home?.body || t('hero.subtitle')}
+              {heroBlock?.description || home?.body || t('hero.subtitle')}
             </p>
           </div>
 
-          {home?.btn_text && home?.btn_link && (
-            home.btn_link.startsWith('/') ? (
+          {(heroBlock?.cta_label || home?.btn_text) && (heroBlock?.cta_url || home?.btn_link) && (
+            (heroBlock?.cta_url || home?.btn_link)?.startsWith('/') ? (
               <Link
-                to={home.btn_link}
+                to={heroBlock?.cta_url || home?.btn_link || '/contact'}
                 className="cta-button inline-flex items-center gap-2 rounded-full px-8 py-4 text-lg font-semibold transition-transform hover:scale-105"
               >
-                {home.btn_text}
+                {heroBlock?.cta_label || home?.btn_text}
                 <ArrowRight size={18} className={i18n.language === 'ar' ? 'rotate-180' : ''} />
               </Link>
             ) : (
               <a
-                href={home.btn_link}
+                href={heroBlock?.cta_url || home?.btn_link}
                 target="_blank"
                 rel="noreferrer"
                 className="cta-button inline-flex items-center gap-2 rounded-full px-8 py-4 text-lg font-semibold transition-transform hover:scale-105"
               >
-                {home.btn_text}
+                {heroBlock?.cta_label || home?.btn_text}
                 <ArrowRight size={18} className={i18n.language === 'ar' ? 'rotate-180' : ''} />
               </a>
             )
@@ -233,7 +254,7 @@ function HomePage() {
           className="hero-scroll absolute bottom-12 flex cursor-pointer flex-col items-center animate-bounce pointer-events-auto"
           onClick={() => document.getElementById('about-us')?.scrollIntoView({behavior: 'smooth'})}
         >
-          <span className="mb-2 text-sm uppercase tracking-widest">{t('hero.scroll')}</span>
+          <span className="mb-2 text-sm uppercase tracking-widest">{settings?.hero_scroll_label || t('hero.scroll')}</span>
           <ArrowDown size={20} />
         </motion.div>
       </section>
@@ -244,15 +265,15 @@ function HomePage() {
           className="glass-panel mx-auto grid max-w-6xl grid-cols-1 items-center gap-16 rounded-3xl border p-8 backdrop-blur-sm md:p-12 lg:grid-cols-2"
         >
           <div className="space-y-6">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-cyan-400">{t('about.subtitle')}</h3>
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-cyan-400">{aboutBlock?.eyebrow || settings?.about_section_label || t('about.subtitle')}</h3>
             <h2 className="text-4xl font-bold leading-tight md:text-5xl">
-              {about?.heading1 || t('about.title_1')}
+              {aboutBlock?.title || about?.heading1 || t('about.title_1')}
               <br />
               <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                {about?.heading2 || t('about.title_2')}
+                {aboutBlock?.subtitle || about?.heading2 || t('about.title_2')}
               </span>
             </h2>
-            <p className="muted-text text-lg leading-relaxed">{about?.description || t('about.desc')}</p>
+            <p className="muted-text text-lg leading-relaxed">{aboutBlock?.description || about?.description || t('about.desc')}</p>
           </div>
 
           <motion.div
@@ -297,42 +318,47 @@ function HomePage() {
         </motion.div>
       </section>
 
-      <section className="subtle-section relative z-20 overflow-hidden border-y py-24 backdrop-blur-sm">
-        <div className="mx-auto mb-12 max-w-6xl px-6 text-center">
-          <h3 className="faint-text text-sm font-semibold uppercase tracking-wider">{t('customers.title')}</h3>
-        </div>
-        <div className="flex w-[200%] animate-marquee">
-          {[...Array(2)].map((_, index) => (
-            <div key={index} className="flex w-1/2 items-center justify-around">
-              {customers.map((customer) => (
-                customer.website_url ? (
-                  <a
-                    key={customer.id}
-                    href={customer.website_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="logo-strip-text flex items-center gap-2 text-2xl font-bold uppercase tracking-widest"
-                  >
-                    {customer.logo_url && <img src={customer.logo_url} alt={customer.name} className="mr-2 inline-block h-8 w-auto" />}
-                    {customer.name}
-                  </a>
-                ) : (
-                  <div key={customer.id} className="logo-strip-text flex items-center gap-2 text-2xl font-bold uppercase tracking-widest">
-                    {customer.logo_url && <img src={customer.logo_url} alt={customer.name} className="mr-2 inline-block h-8 w-auto" />}
-                    {customer.name}
-                  </div>
-                )
-              ))}
-            </div>
-          ))}
-        </div>
-      </section>
+      {customers.length > 0 && (
+        <section className="subtle-section relative z-20 overflow-hidden border-y py-24 backdrop-blur-sm">
+          <div className="mx-auto mb-12 max-w-6xl px-6 text-center">
+            <h3 className="faint-text text-sm font-semibold uppercase tracking-wider">{settings?.customers_section_label || t('customers.title')}</h3>
+          </div>
+          <div className="flex w-[200%] animate-marquee">
+            {[...Array(2)].map((_, index) => (
+              <div key={index} className="flex w-1/2 items-center justify-around">
+                {customers.map((customer) => (
+                  customer.website_url ? (
+                    <a
+                      key={customer.id}
+                      href={customer.website_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="logo-strip-text flex items-center gap-2 text-2xl font-bold uppercase tracking-widest"
+                    >
+                      {customer.logo_url && <img src={customer.logo_url} alt={customer.name} className="mr-2 inline-block h-8 w-auto" />}
+                      {customer.name}
+                    </a>
+                  ) : (
+                    <div key={customer.id} className="logo-strip-text flex items-center gap-2 text-2xl font-bold uppercase tracking-widest">
+                      {customer.logo_url && <img src={customer.logo_url} alt={customer.name} className="mr-2 inline-block h-8 w-auto" />}
+                      {customer.name}
+                    </div>
+                  )
+                ))}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section id="services" ref={servicesRef} className="relative z-20 flex min-h-screen flex-col justify-center py-24">
         <motion.div style={{y: servicesY}} className="mx-auto w-full max-w-6xl px-6">
           <div className="mb-16 space-y-4 text-center">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-cyan-400">{t('services.subtitle')}</h3>
-            <h2 className="text-4xl font-bold md:text-5xl">{t('services.title')}</h2>
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-cyan-400">{servicesBlock?.eyebrow || settings?.services_section_label || t('services.subtitle')}</h3>
+            <h2 className="text-4xl font-bold md:text-5xl">{servicesBlock?.title || settings?.services_section_title || t('services.title')}</h2>
+            {(servicesBlock?.description || '').trim() && (
+              <p className="muted-text mx-auto max-w-3xl text-lg">{servicesBlock?.description}</p>
+            )}
           </div>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
             {services.map((service) => (
@@ -347,7 +373,7 @@ function HomePage() {
                     rel="noreferrer"
                     className="mt-6 inline-flex items-center gap-2 text-cyan-400 transition-colors hover:text-cyan-300"
                   >
-                    {t('portfolio.view_details')}
+                    {settings?.portfolio_view_details_label || t('portfolio.view_details')}
                     <ArrowRight size={16} className={i18n.language === 'ar' ? 'rotate-180' : ''} />
                   </a>
                 )}
@@ -361,9 +387,9 @@ function HomePage() {
         <div className="mx-auto max-w-6xl px-6">
           <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2">
             <div>
-              <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-cyan-400">{t('figures.subtitle')}</h3>
-              <h2 className="mb-6 text-4xl font-bold md:text-5xl">{t('figures.title')}</h2>
-              <p className="muted-text text-lg leading-relaxed">{t('figures.desc')}</p>
+              <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-cyan-400">{statsBlock?.eyebrow || settings?.figures_section_label || t('figures.subtitle')}</h3>
+              <h2 className="mb-6 text-4xl font-bold md:text-5xl">{statsBlock?.title || settings?.figures_section_title || t('figures.title')}</h2>
+              <p className="muted-text text-lg leading-relaxed">{statsBlock?.description || settings?.figures_section_description || t('figures.desc')}</p>
             </div>
             <div className="grid grid-cols-2 gap-8">
               {stats.map((stat) => (
@@ -382,8 +408,11 @@ function HomePage() {
       <section id="portfolio" className="relative z-20 flex min-h-screen flex-col justify-center py-24">
         <div className="mx-auto w-full max-w-6xl px-6">
           <div className="mb-16 space-y-4 text-center">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-cyan-400">{t('portfolio.subtitle')}</h3>
-            <h2 className="text-4xl font-bold md:text-5xl">{t('portfolio.title')}</h2>
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-cyan-400">{portfolioBlock?.eyebrow || settings?.portfolio_section_label || t('portfolio.subtitle')}</h3>
+            <h2 className="text-4xl font-bold md:text-5xl">{portfolioBlock?.title || settings?.portfolio_section_title || t('portfolio.title')}</h2>
+            {(portfolioBlock?.description || '').trim() && (
+              <p className="muted-text mx-auto max-w-3xl text-lg">{portfolioBlock?.description}</p>
+            )}
           </div>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
             {loading && <div className="col-span-2 py-8 text-center">Loading projects...</div>}
@@ -408,7 +437,7 @@ function HomePage() {
                   </span>
                   <h3 className="mb-2 text-2xl font-bold text-white md:text-3xl">{project.title}</h3>
                   <div className="project-meta flex items-center gap-2 transition-colors duration-300">
-                    <span className="text-sm font-semibold uppercase tracking-wider">{t('portfolio.view_details')}</span>
+                    <span className="text-sm font-semibold uppercase tracking-wider">{settings?.portfolio_view_details_label || t('portfolio.view_details')}</span>
                     <ArrowRight
                       size={16}
                       className={`transform opacity-0 transition-all duration-500 ${i18n.language === 'ar' ? 'translate-x-4 rotate-180 group-hover:translate-x-0' : '-translate-x-4 group-hover:translate-x-0'} group-hover:opacity-100`}
@@ -424,35 +453,37 @@ function HomePage() {
       <section id="blog" className="subtle-section relative z-20 border-y py-24 backdrop-blur-sm">
         <div className="mx-auto max-w-6xl px-6">
           <div className="mb-16 space-y-4 text-center">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-cyan-400">{t('header.blog')}</h3>
-            <h2 className="text-4xl font-bold md:text-5xl">{t('header.blog')}</h2>
-            <p className="muted-text mx-auto max-w-2xl text-lg">{about?.description || t('hero.subtitle')}</p>
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-cyan-400">{blogBlock?.eyebrow || settings?.blog_section_label || t('header.blog')}</h3>
+            <h2 className="text-4xl font-bold md:text-5xl">{blogBlock?.title || settings?.blog_section_title || t('header.blog')}</h2>
+            <p className="muted-text mx-auto max-w-2xl text-lg">{blogBlock?.description || settings?.blog_section_description || about?.description || t('hero.subtitle')}</p>
           </div>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
             {blogPosts.slice(0, 3).map((post) => (
-              <article key={post.id} className="card-surface overflow-hidden rounded-2xl border border-[var(--border-subtle)]">
-                {post.image_url && (
-                  <img
-                    src={post.image_url}
-                    alt={post.title || 'Blog post'}
-                    className="h-52 w-full object-cover"
-                    referrerPolicy="no-referrer"
-                  />
-                )}
-                <div className="space-y-4 p-6">
-                  <p className="faint-text text-xs uppercase tracking-[0.3em]">
-                    {post.published_at
-                      ? new Date(post.published_at).toLocaleDateString(i18n.language === 'ar' ? 'ar' : 'en-US', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric',
-                        })
-                      : 'Draft'}
-                  </p>
-                  <h3 className="text-2xl font-bold">{post.title}</h3>
-                  <p className="muted-text line-clamp-4">{post.excerpt || 'No excerpt has been added yet.'}</p>
-                </div>
-              </article>
+              <Link key={post.id} to={`/blog/${post.slug || post.id}`} className="block">
+                <article className="card-surface overflow-hidden rounded-2xl border border-[var(--border-subtle)]">
+                  {post.image_url && (
+                    <img
+                      src={post.image_url}
+                      alt={post.title || 'Blog post'}
+                      className="h-52 w-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  )}
+                  <div className="space-y-4 p-6">
+                    <p className="faint-text text-xs uppercase tracking-[0.3em]">
+                      {post.published_at
+                        ? new Date(post.published_at).toLocaleDateString(i18n.language === 'ar' ? 'ar' : 'en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                          })
+                        : 'Draft'}
+                    </p>
+                    <h3 className="text-2xl font-bold">{post.title}</h3>
+                    <p className="muted-text line-clamp-4">{post.excerpt || 'No excerpt has been added yet.'}</p>
+                  </div>
+                </article>
+              </Link>
             ))}
           </div>
         </div>
@@ -460,10 +491,10 @@ function HomePage() {
 
       <section id="contact" className="relative z-20 flex h-screen flex-col items-center justify-center pb-32">
         <div className="glass-panel space-y-8 rounded-3xl border p-12 text-center backdrop-blur-md">
-          <h2 className="text-5xl font-bold tracking-tighter md:text-7xl">{t('contact.title')}</h2>
-          <p className="muted-text mx-auto max-w-2xl text-xl">{t('contact.desc')}</p>
+          <h2 className="text-5xl font-bold tracking-tighter md:text-7xl">{contactCtaBlock?.title || settings?.contact_cta_title || t('contact.title')}</h2>
+          <p className="muted-text mx-auto max-w-2xl text-xl">{contactCtaBlock?.description || settings?.contact_cta_description || t('contact.desc')}</p>
           <Link to="/contact" className="cta-button inline-block cursor-pointer rounded-full px-8 py-4 text-lg font-semibold transition-transform hover:scale-105">
-            {t('contact.button')}
+            {contactCtaBlock?.cta_label || settings?.contact_cta_button_label || t('contact.button')}
           </Link>
         </div>
       </section>
@@ -485,6 +516,7 @@ export default function App() {
       <Route path="/promotions" element={<PromotionsTerms />} />
       <Route path="/security" element={<SecurityPolicy />} />
       <Route path="/contact" element={<ContactPage />} />
+      <Route path="/blog/:postId" element={<BlogPostPage />} />
     </Routes>
   );
 }

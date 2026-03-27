@@ -19,8 +19,10 @@ use Filament\Tables\Table;
 class StatResource extends Resource
 {
     protected static ?string $model = Stat::class;
+    protected static ?string $navigationLabel = 'Stats';
+    protected static ?string $pluralModelLabel = 'Stats';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Projects';
+    protected static string|\UnitEnum|null $navigationGroup = 'Website CMS';
     protected static ?int $navigationSort = 4;
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
