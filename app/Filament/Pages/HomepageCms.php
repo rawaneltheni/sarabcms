@@ -50,6 +50,7 @@ class HomepageCms extends Page implements HasForms
             'hero_description' => $heroBlock?->description ?? $home?->body,
             'hero_button_label' => $heroBlock?->cta_label ?? $home?->btn_text,
             'hero_button_link' => $heroBlock?->cta_url ?? $home?->btn_link,
+            'hero_scroll_label' => $settings?->hero_scroll_label,
 
             'about_section_label' => $about ? ($settings?->about_section_label) : ($settings?->about_section_label),
             'about_heading_1' => $about?->heading1,
@@ -63,6 +64,8 @@ class HomepageCms extends Page implements HasForms
             'services_section_label' => $servicesBlock?->eyebrow ?? $settings?->services_section_label,
             'services_section_title' => $servicesBlock?->title ?? $settings?->services_section_title,
             'services_section_description' => $servicesBlock?->description,
+
+            'customers_section_label' => $settings?->customers_section_label,
 
             'stats_section_label' => $settings?->figures_section_label,
             'stats_section_title' => $settings?->figures_section_title,
@@ -78,6 +81,7 @@ class HomepageCms extends Page implements HasForms
             'blog_section_description' => $blogBlock?->description ?? $settings?->blog_section_description,
             'blog_button_label' => $blogBlock?->cta_label ?? $settings?->blog_cta_label,
             'blog_button_link' => $blogBlock?->cta_url ?? '/blog',
+            'blog_read_more_label' => $settings?->blog_read_more_label,
 
             'contact_cta_label' => $contactCtaBlock?->eyebrow ?? $settings?->contact_cta_description,
             'contact_cta_title' => $contactCtaBlock?->title ?? $settings?->contact_cta_title,
@@ -102,6 +106,7 @@ class HomepageCms extends Page implements HasForms
                             ->formatStateUsing(fn (?string $state): ?string => PlainText::clean($state))
                             ->dehydrateStateUsing(fn (?string $state): ?string => PlainText::clean($state))
                             ->columnSpanFull(),
+                        TextInput::make('hero_scroll_label')->label('Scroll label'),
                         TextInput::make('hero_button_label')->label('Button label'),
                         TextInput::make('hero_button_link')->label('Button link'),
                     ])->columns(2),
@@ -132,6 +137,10 @@ class HomepageCms extends Page implements HasForms
                             ->formatStateUsing(fn (?string $state): ?string => PlainText::clean($state))
                             ->dehydrateStateUsing(fn (?string $state): ?string => PlainText::clean($state))
                             ->columnSpanFull(),
+                    ])->columns(2),
+                Section::make('Customers Section')
+                    ->schema([
+                        TextInput::make('customers_section_label')->label('Section label'),
                     ])->columns(2),
                 Section::make('Stats Section')
                     ->schema([
@@ -165,6 +174,7 @@ class HomepageCms extends Page implements HasForms
                             ->columnSpanFull(),
                         TextInput::make('blog_button_label')->label('Button label'),
                         TextInput::make('blog_button_link')->label('Button link'),
+                        TextInput::make('blog_read_more_label')->label('Read more label'),
                     ])->columns(2),
                 Section::make('Final CTA')
                     ->schema([
@@ -210,7 +220,9 @@ class HomepageCms extends Page implements HasForms
         ]);
 
         $settings->update([
+            'hero_scroll_label' => $data['hero_scroll_label'] ?? null,
             'about_section_label' => $data['about_section_label'] ?? null,
+            'customers_section_label' => $data['customers_section_label'] ?? null,
             'services_section_label' => $data['services_section_label'] ?? null,
             'services_section_title' => $data['services_section_title'] ?? null,
             'figures_section_label' => $data['stats_section_label'] ?? null,
@@ -223,8 +235,9 @@ class HomepageCms extends Page implements HasForms
             'blog_section_title' => $data['blog_section_title'] ?? null,
             'blog_section_description' => $data['blog_section_description'] ?? null,
             'blog_cta_label' => $data['blog_button_label'] ?? null,
+            'blog_read_more_label' => $data['blog_read_more_label'] ?? null,
             'contact_cta_title' => $data['contact_cta_title'] ?? null,
-            'contact_cta_description' => $data['contact_cta_label'] ?? null,
+            'contact_cta_description' => $data['contact_cta_description'] ?? null,
             'contact_cta_button_label' => $data['contact_cta_button_label'] ?? null,
         ]);
 

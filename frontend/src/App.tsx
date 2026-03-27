@@ -5,7 +5,7 @@
 
 import React, {useEffect, useRef, useState} from 'react';
 import {Link, Route, Routes} from 'react-router-dom';
-import {ArrowDown, ArrowRight, CheckCircle2} from 'lucide-react';
+import {ArrowDown, ArrowRight, CalendarDays, CheckCircle2, Globe, Smartphone} from 'lucide-react';
 import {motion, useScroll, useTransform} from 'motion/react';
 import {useTranslation} from 'react-i18next';
 import api from './api';
@@ -21,7 +21,9 @@ import CancellationPolicy from './components/CancellationPolicy';
 import PromotionsTerms from './components/PromotionsTerms';
 import SecurityPolicy from './components/SecurityPolicy';
 import ContactPage from './components/ContactPage';
+import BlogIndexPage from './components/BlogIndexPage';
 import BlogPostPage from './components/BlogPostPage';
+import PricingPage from './components/PricingPage';
 import {useSiteSettings} from './hooks/useSiteSettings';
 import {usePageBlocks} from './hooks/usePageBlocks';
 
@@ -76,6 +78,13 @@ interface BlogPost {
   published_at: string | null;
 }
 
+interface ServiceCardFallback {
+  key: string;
+  title: string;
+  description: string;
+  icon: React.ComponentType<{className?: string}>;
+}
+
 function HomePage() {
   const {t, i18n} = useTranslation();
   const settings = useSiteSettings();
@@ -108,7 +117,7 @@ function HomePage() {
   useEffect(() => {
     setLoading(true);
 
-    Promise.all([
+    Promise.allSettled([
       api.get('/projects'),
       api.get('/homes'),
       api.get('/abouts'),
@@ -117,10 +126,29 @@ function HomePage() {
       api.get('/stats'),
       api.get('/blog-posts'),
     ])
-      .then(([projectsRes, homesRes, aboutRes, customersRes, servicesRes, statsRes, blogPostsRes]) => {
-        const projectItems = projectsRes.data.data || [];
-        const homeItems = homesRes.data.data || [];
-        const aboutItems = aboutRes.data.data || [];
+      .then((results) => {
+        const [
+          projectsRes,
+          homesRes,
+          aboutRes,
+          customersRes,
+          servicesRes,
+          statsRes,
+          blogPostsRes,
+        ] = results;
+
+        const projectItems =
+          projectsRes.status === 'fulfilled'
+            ? (projectsRes.value.data?.data ?? [])
+            : [];
+        const homeItems =
+          homesRes.status === 'fulfilled'
+            ? (homesRes.value.data?.data ?? [])
+            : [];
+        const aboutItems =
+          aboutRes.status === 'fulfilled'
+            ? (aboutRes.value.data?.data ?? [])
+            : [];
 
         setProjects(
           projectItems.map((project: any) => ({
@@ -135,21 +163,11 @@ function HomePage() {
         );
         setHome(homeItems[0] ?? null);
         setAbout(aboutItems[0] ?? null);
-        setCustomers(customersRes.data.data || []);
-        setServices(servicesRes.data.data || []);
-        setStats(statsRes.data.data || []);
-        setBlogPosts(blogPostsRes.data.data || []);
-        setError(null);
-      })
-      .catch(() => {
-        setProjects([]);
-        setHome(null);
-        setAbout(null);
-        setCustomers([]);
-        setServices([]);
-        setStats([]);
-        setBlogPosts([]);
-        setError('Failed to load CMS data');
+        setCustomers(customersRes.status === 'fulfilled' ? (customersRes.value.data?.data ?? []) : []);
+        setServices(servicesRes.status === 'fulfilled' ? (servicesRes.value.data?.data ?? []) : []);
+        setStats(statsRes.status === 'fulfilled' ? (statsRes.value.data?.data ?? []) : []);
+        setBlogPosts(blogPostsRes.status === 'fulfilled' ? (blogPostsRes.value.data?.data ?? []) : []);
+        setError(projectsRes.status === 'rejected' ? 'Failed to load selected works' : null);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -162,6 +180,8 @@ function HomePage() {
   const portfolioBlock = blockMap.portfolio;
   const blogBlock = blockMap.blog;
   const contactCtaBlock = blockMap.contact_cta;
+  const blogCtaUrl = blogBlock?.cta_url || '/blog';
+  const contactCtaUrl = contactCtaBlock?.cta_url || '/contact';
   const aboutBlockFeatures = [
     aboutBlock?.meta?.feature_1,
     aboutBlock?.meta?.feature_2,
@@ -173,6 +193,64 @@ function HomePage() {
           .filter((project) => project.show_on_homepage)
           .sort((a, b) => (a.homepage_order ?? 0) - (b.homepage_order ?? 0))
       : projects;
+  const fallbackProjects: Project[] = [
+    {
+      id: -1,
+      title: t('projects.1.title'),
+      category: t('projects.1.category'),
+      image: 'https://picsum.photos/seed/sarab1/800/600',
+      description: t('projects.1.desc'),
+    },
+    {
+      id: -2,
+      title: t('projects.2.title'),
+      category: t('projects.2.category'),
+      image: 'https://picsum.photos/seed/sarab2/800/600',
+      description: t('projects.2.desc'),
+    },
+    {
+      id: -3,
+      title: t('projects.3.title'),
+      category: t('projects.3.category'),
+      image: 'https://picsum.photos/seed/sarab3/800/600',
+      description: t('projects.3.desc'),
+    },
+    {
+      id: -4,
+      title: t('projects.4.title'),
+      category: t('projects.4.category'),
+      image: 'https://picsum.photos/seed/sarab4/800/600',
+      description: t('projects.4.desc'),
+    },
+  ];
+  const portfolioProjects = featuredProjects.length ? featuredProjects : fallbackProjects;
+  const fallbackBlogPosts: BlogPost[] = [
+    {
+      id: -1,
+      slug: '1',
+      title: t('blog.posts.1.title'),
+      excerpt: t('blog.posts.1.excerpt'),
+      image_url: 'https://picsum.photos/seed/sarab-blog-1/900/600',
+      published_at: t('blog.posts.1.date'),
+    },
+    {
+      id: -2,
+      slug: '2',
+      title: t('blog.posts.2.title'),
+      excerpt: t('blog.posts.2.excerpt'),
+      image_url: 'https://picsum.photos/seed/sarab-blog-2/900/600',
+      published_at: t('blog.posts.2.date'),
+    },
+    {
+      id: -3,
+      slug: '3',
+      title: t('blog.posts.3.title'),
+      excerpt: t('blog.posts.3.excerpt'),
+      image_url: 'https://picsum.photos/seed/sarab-blog-3/900/600',
+      published_at: t('blog.posts.3.date'),
+    },
+  ];
+  const homepageBlogPosts = blogPosts.length ? blogPosts.slice(0, 3) : fallbackBlogPosts;
 
   const aboutFeatures =
     about?.features?.length
@@ -182,6 +260,45 @@ function HomePage() {
         : [t('about.point_1'), t('about.point_2'), t('about.point_3')];
 
   const aboutGallery = [about?.image1_url, about?.image2_url, about?.image3_url].filter(Boolean) as string[];
+  const customerMarqueeItems = customers.length
+    ? customers
+    : [
+        {id: -1, name: 'Client Alpha', logo_url: null, website_url: null},
+        {id: -2, name: 'Beta Corp', logo_url: null, website_url: null},
+        {id: -3, name: 'Gamma Tech', logo_url: null, website_url: null},
+        {id: -4, name: 'Delta Systems', logo_url: null, website_url: null},
+        {id: -5, name: 'Epsilon Inc', logo_url: null, website_url: null},
+      ];
+  const serviceCards: Service[] | ServiceCardFallback[] = services.length
+    ? services
+    : [
+        {
+          key: 'web',
+          title: t('services.web_dev'),
+          description: t('services.web_dev_desc'),
+          icon: Globe,
+        },
+        {
+          key: 'app',
+          title: t('services.app_dev'),
+          description: t('services.app_dev_desc'),
+          icon: Smartphone,
+        },
+        {
+          key: 'consulting',
+          title: t('services.consulting'),
+          description: t('services.consulting_desc'),
+          icon: ArrowRight,
+        },
+      ];
+  const statsItems = stats.length
+    ? stats
+    : [
+        {id: -1, number: 250, label: t('figures.customers')},
+        {id: -2, number: 50, label: t('figures.trainees')},
+        {id: -3, number: 2000000, label: t('figures.users')},
+        {id: -4, number: 25, label: t('figures.projects')},
+      ];
 
   return (
     <div className="page-shell min-h-screen font-sans selection:bg-cyan-500/30" dir={i18n.language === 'ar' ? 'rtl' : 'ltr'}>
@@ -197,12 +314,12 @@ function HomePage() {
 
       <ParticleLogo />
 
-      <section id="home" className="relative z-20 flex h-screen flex-col items-center justify-center pointer-events-none">
+      <section id="home" className="relative z-20 flex h-screen flex-col items-center justify-end px-6 pb-28 pointer-events-none md:pb-32">
         <motion.div
           initial={{opacity: 0, y: 24}}
           animate={{opacity: 1, y: 0}}
           transition={{duration: 0.9, delay: 0.4}}
-          className="pointer-events-auto relative z-10 mx-auto flex max-w-6xl flex-col items-center gap-8 px-6 text-center"
+          className="pointer-events-auto relative z-10 mx-auto flex max-w-6xl flex-col items-center gap-5 text-center"
         >
           {home?.image_url && (
             <div className="overflow-hidden rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-elevated)]/60 p-2 shadow-[0_0_40px_-10px_rgba(6,182,212,0.25)]">
@@ -215,10 +332,10 @@ function HomePage() {
             </div>
           )}
 
-          <div className="space-y-4">
-            <h1 className="text-5xl font-bold tracking-[0.2em] md:text-7xl">
+          <div className="space-y-3">
+            <h1 className="text-3xl font-bold tracking-[0.16em] md:text-5xl">
               {heroBlock?.title || home?.h1 || t('hero.title')}
-              {(home?.h2 || '').trim() && (
+              {(heroBlock?.subtitle || home?.h2 || '').trim() && (
                 <>
                   <br />
                   <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
@@ -227,7 +344,7 @@ function HomePage() {
                 </>
               )}
             </h1>
-            <p className="soft-text mx-auto max-w-2xl text-lg font-light tracking-wide md:text-2xl">
+            <p className="soft-text mx-auto max-w-xl text-sm font-light tracking-[0.18em] uppercase md:text-base">
               {heroBlock?.description || home?.body || t('hero.subtitle')}
             </p>
           </div>
@@ -259,7 +376,7 @@ function HomePage() {
           initial={{opacity: 0}}
           animate={{opacity: 1}}
           transition={{duration: 1, delay: 1.5}}
-          className="hero-scroll absolute bottom-12 flex cursor-pointer flex-col items-center animate-bounce pointer-events-auto"
+          className="hero-scroll absolute bottom-10 flex cursor-pointer flex-col items-center animate-bounce pointer-events-auto md:bottom-12"
           onClick={() => document.getElementById('about-us')?.scrollIntoView({behavior: 'smooth'})}
         >
           <span className="mb-2 text-sm uppercase tracking-widest">{settings?.hero_scroll_label || t('hero.scroll')}</span>
@@ -326,55 +443,57 @@ function HomePage() {
         </motion.div>
       </section>
 
-      {customers.length > 0 && (
-        <section className="subtle-section relative z-20 overflow-hidden border-y py-24 backdrop-blur-sm">
-          <div className="mx-auto mb-12 max-w-6xl px-6 text-center">
-            <h3 className="faint-text text-sm font-semibold uppercase tracking-wider">{settings?.customers_section_label || t('customers.title')}</h3>
-          </div>
-          <div className="flex w-[200%] animate-marquee">
-            {[...Array(2)].map((_, index) => (
-              <div key={index} className="flex w-1/2 items-center justify-around">
-                {customers.map((customer) => (
-                  customer.website_url ? (
-                    <a
-                      key={customer.id}
-                      href={customer.website_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="logo-strip-text flex items-center gap-2 text-2xl font-bold uppercase tracking-widest"
-                    >
-                      {customer.logo_url && <img src={customer.logo_url} alt={customer.name} className="mr-2 inline-block h-8 w-auto" />}
-                      {customer.name}
-                    </a>
-                  ) : (
-                    <div key={customer.id} className="logo-strip-text flex items-center gap-2 text-2xl font-bold uppercase tracking-widest">
-                      {customer.logo_url && <img src={customer.logo_url} alt={customer.name} className="mr-2 inline-block h-8 w-auto" />}
-                      {customer.name}
-                    </div>
-                  )
-                ))}
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+      <section className="subtle-section relative z-20 overflow-hidden border-y py-24 backdrop-blur-sm">
+        <div className="mx-auto mb-12 max-w-6xl px-6 text-center">
+          <h3 className="faint-text text-sm font-semibold uppercase tracking-wider">{settings?.customers_section_label || t('customers.title')}</h3>
+        </div>
+        <div className="flex w-[200%] animate-marquee">
+          {[...Array(2)].map((_, index) => (
+            <div key={index} className="flex w-1/2 items-center justify-around">
+              {customerMarqueeItems.map((customer) => (
+                customer.website_url ? (
+                  <a
+                    key={customer.id}
+                    href={customer.website_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="logo-strip-text flex items-center gap-2 text-2xl font-bold uppercase tracking-widest"
+                  >
+                    {customer.logo_url && <img src={customer.logo_url} alt={customer.name} className="mr-2 inline-block h-8 w-auto" />}
+                    {customer.name}
+                  </a>
+                ) : (
+                  <div key={customer.id} className="logo-strip-text flex items-center gap-2 text-2xl font-bold uppercase tracking-widest">
+                    {customer.logo_url && <img src={customer.logo_url} alt={customer.name} className="mr-2 inline-block h-8 w-auto" />}
+                    {customer.name}
+                  </div>
+                )
+              ))}
+            </div>
+          ))}
+        </div>
+      </section>
 
       <section id="services" ref={servicesRef} className="relative z-20 flex min-h-screen flex-col justify-center py-24">
         <motion.div style={{y: servicesY}} className="mx-auto w-full max-w-6xl px-6">
           <div className="mb-16 space-y-4 text-center">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-cyan-400">{servicesBlock?.eyebrow || settings?.services_section_label || t('services.subtitle')}</h3>
             <h2 className="text-4xl font-bold md:text-5xl">{servicesBlock?.title || settings?.services_section_title || t('services.title')}</h2>
-            {(servicesBlock?.description || '').trim() && (
-              <p className="muted-text mx-auto max-w-3xl text-lg">{servicesBlock?.description}</p>
-            )}
+            <p className="muted-text mx-auto max-w-3xl text-lg">
+              {servicesBlock?.description || t('about.desc')}
+            </p>
           </div>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            {services.map((service) => (
-              <div key={service.id} className="card-surface rounded-2xl border p-8 backdrop-blur-md transition-colors hover:border-cyan-500/30">
-                {service.image_url && <img src={service.image_url} alt={service.title || 'Service'} className="mb-6 h-12 w-12 object-contain" />}
+            {serviceCards.map((service) => (
+              <div key={'id' in service ? service.id : service.key} className="card-surface rounded-2xl border p-8 backdrop-blur-md transition-colors hover:border-cyan-500/30">
+                {'image_url' in service && service.image_url ? (
+                  <img src={service.image_url} alt={service.title || 'Service'} className="mb-6 h-12 w-12 object-contain" />
+                ) : 'icon' in service ? (
+                  <service.icon className="mb-6 h-12 w-12 text-cyan-400" />
+                ) : null}
                 <h3 className="mb-4 text-2xl font-bold">{service.title}</h3>
                 <p className="muted-text">{service.description}</p>
-                {service.url && (
+                {'url' in service && service.url && (
                   <a
                     href={service.url}
                     target="_blank"
@@ -400,7 +519,7 @@ function HomePage() {
               <p className="muted-text text-lg leading-relaxed">{statsBlock?.description || settings?.figures_section_description || t('figures.desc')}</p>
             </div>
             <div className="grid grid-cols-2 gap-8">
-              {stats.map((stat) => (
+              {statsItems.map((stat) => (
                 <div key={stat.id} className="space-y-2">
                   <div className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-4xl font-bold text-transparent md:text-5xl">
                     <AnimatedCounter value={Number(stat.number ?? 0)} />
@@ -424,9 +543,7 @@ function HomePage() {
           </div>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
             {loading && <div className="col-span-2 py-8 text-center">Loading projects...</div>}
-            {error && <div className="col-span-2 py-8 text-center text-red-500">{error}</div>}
-            {!loading && !error && featuredProjects.length === 0 && <div className="col-span-2 py-8 text-center">No projects found.</div>}
-            {featuredProjects.map((project) => (
+            {portfolioProjects.map((project) => (
                 <div
                   key={project.id}
                   onClick={() => setSelectedProject(project)}
@@ -460,15 +577,36 @@ function HomePage() {
 
       <section id="blog" className="subtle-section relative z-20 border-y py-24 backdrop-blur-sm">
         <div className="mx-auto max-w-6xl px-6">
-          <div className="mb-16 space-y-4 text-center">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-cyan-400">{blogBlock?.eyebrow || settings?.blog_section_label || t('header.blog')}</h3>
-            <h2 className="text-4xl font-bold md:text-5xl">{blogBlock?.title || settings?.blog_section_title || t('header.blog')}</h2>
-            <p className="muted-text mx-auto max-w-2xl text-lg">{blogBlock?.description || settings?.blog_section_description || about?.description || t('hero.subtitle')}</p>
+          <div className="mb-16 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+            <div className="max-w-2xl space-y-4">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-cyan-400">{blogBlock?.eyebrow || settings?.blog_section_label || t('header.blog')}</h3>
+              <h2 className="text-4xl font-bold md:text-5xl">{blogBlock?.title || settings?.blog_section_title || t('blog.title')}</h2>
+              <p className="muted-text text-lg leading-relaxed">{blogBlock?.description || settings?.blog_section_description || t('blog.description')}</p>
+            </div>
+            {blogCtaUrl.startsWith('/') ? (
+              <Link
+                to={blogCtaUrl}
+                className="project-meta inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wider transition-colors hover:text-cyan-400"
+              >
+                <span>{blogBlock?.cta_label || settings?.blog_cta_label || settings?.blog_read_more_label || t('blog.cta')}</span>
+                <ArrowRight size={16} className={i18n.language === 'ar' ? 'rotate-180' : ''} />
+              </Link>
+            ) : (
+              <a
+                href={blogCtaUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="project-meta inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wider transition-colors hover:text-cyan-400"
+              >
+                <span>{blogBlock?.cta_label || settings?.blog_cta_label || settings?.blog_read_more_label || t('blog.cta')}</span>
+                <ArrowRight size={16} className={i18n.language === 'ar' ? 'rotate-180' : ''} />
+              </a>
+            )}
           </div>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            {blogPosts.slice(0, 3).map((post) => (
+            {homepageBlogPosts.map((post, index) => (
               <Link key={post.id} to={`/blog/${post.slug || post.id}`} className="block">
-                <article className="card-surface overflow-hidden rounded-2xl border border-[var(--border-subtle)]">
+                <article className="card-surface h-full overflow-hidden rounded-2xl border border-[var(--border-subtle)] transition-colors hover:border-cyan-500/30">
                   {post.image_url && (
                     <img
                       src={post.image_url}
@@ -478,17 +616,27 @@ function HomePage() {
                     />
                   )}
                   <div className="space-y-4 p-6">
-                    <p className="faint-text text-xs uppercase tracking-[0.3em]">
-                      {post.published_at
-                        ? new Date(post.published_at).toLocaleDateString(i18n.language === 'ar' ? 'ar' : 'en-US', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric',
-                          })
-                        : 'Draft'}
-                    </p>
+                    <div className="mb-2 flex items-center justify-between gap-4">
+                      <span className="text-sm font-semibold uppercase tracking-wider text-cyan-400">
+                        {blogPosts.length ? (settings?.blog_section_label || t('header.blog')) : t(`blog.posts.${index + 1}.category`)}
+                      </span>
+                      <span className="muted-text inline-flex items-center gap-2 text-sm">
+                        <CalendarDays size={16} className="text-cyan-400" />
+                        {blogPosts.length && post.published_at
+                          ? new Date(post.published_at).toLocaleDateString(i18n.language === 'ar' ? 'ar' : 'en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                            })
+                          : post.published_at || 'Draft'}
+                      </span>
+                    </div>
                     <h3 className="text-2xl font-bold">{post.title}</h3>
-                    <p className="muted-text line-clamp-4">{post.excerpt || 'No excerpt has been added yet.'}</p>
+                    <p className="muted-text mb-8 line-clamp-4 leading-relaxed">{post.excerpt || 'No excerpt has been added yet.'}</p>
+                    <div className="project-meta inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wider transition-colors hover:text-cyan-400">
+                      <span>{settings?.blog_read_more_label || settings?.blog_cta_label || t('blog.read_more')}</span>
+                      <ArrowRight size={16} className={i18n.language === 'ar' ? 'rotate-180' : ''} />
+                    </div>
                   </div>
                 </article>
               </Link>
@@ -501,9 +649,20 @@ function HomePage() {
         <div className="glass-panel space-y-8 rounded-3xl border p-12 text-center backdrop-blur-md">
           <h2 className="text-5xl font-bold tracking-tighter md:text-7xl">{contactCtaBlock?.title || settings?.contact_cta_title || t('contact.title')}</h2>
           <p className="muted-text mx-auto max-w-2xl text-xl">{contactCtaBlock?.description || settings?.contact_cta_description || t('contact.desc')}</p>
-          <Link to="/contact" className="cta-button inline-block cursor-pointer rounded-full px-8 py-4 text-lg font-semibold transition-transform hover:scale-105">
-            {contactCtaBlock?.cta_label || settings?.contact_cta_button_label || t('contact.button')}
-          </Link>
+          {contactCtaUrl.startsWith('/') ? (
+            <Link to={contactCtaUrl} className="cta-button inline-block cursor-pointer rounded-full px-8 py-4 text-lg font-semibold transition-transform hover:scale-105">
+              {contactCtaBlock?.cta_label || settings?.contact_cta_button_label || t('contact.button')}
+            </Link>
+          ) : (
+            <a
+              href={contactCtaUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="cta-button inline-block cursor-pointer rounded-full px-8 py-4 text-lg font-semibold transition-transform hover:scale-105"
+            >
+              {contactCtaBlock?.cta_label || settings?.contact_cta_button_label || t('contact.button')}
+            </a>
+          )}
         </div>
       </section>
 
@@ -524,6 +683,8 @@ export default function App() {
       <Route path="/promotions" element={<PromotionsTerms />} />
       <Route path="/security" element={<SecurityPolicy />} />
       <Route path="/contact" element={<ContactPage />} />
+      <Route path="/pricing" element={<PricingPage />} />
+      <Route path="/blog" element={<BlogIndexPage />} />
       <Route path="/blog/:postId" element={<BlogPostPage />} />
     </Routes>
   );

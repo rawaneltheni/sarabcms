@@ -70,7 +70,7 @@ export default function BlogPostPage() {
 
       <div className="pt-32 pb-24 px-6 max-w-4xl mx-auto relative z-20">
         <Link
-          to="/#blog"
+          to="/blog"
           className="muted-text inline-flex items-center gap-2 hover:text-cyan-400 transition-colors mb-8 font-medium"
         >
           <ArrowLeft size={20} className={i18n.language === 'ar' ? 'rotate-180' : ''} />
@@ -118,41 +118,40 @@ export default function BlogPostPage() {
               <p className="muted-text">{settings?.blog_more_description || 'Keep exploring our latest insights, stories, and product thinking.'}</p>
             </div>
             <Link
-              to="/contact"
+              to="/blog"
               className="project-meta inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wider hover:text-cyan-400 transition-colors"
             >
-              <span>{settings?.blog_cta_label || 'Read more'}</span>
+              <span>{settings?.blog_cta_label || settings?.blog_read_more_label || t('blog.cta')}</span>
               <ArrowRight size={16} className={i18n.language === 'ar' ? 'rotate-180' : ''} />
             </Link>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {otherPosts.map((item) => (
-              <article key={item.id} className="card-surface border rounded-2xl p-6 backdrop-blur-md">
-                <div className="flex items-center justify-between gap-4 mb-4">
-                  <span className="text-cyan-400 text-sm font-semibold uppercase tracking-wider">
-                    {settings?.blog_section_label || t('header.blog')}
-                  </span>
-                  <span className="muted-text text-sm">
-                    {item.published_at
-                      ? new Date(item.published_at).toLocaleDateString(i18n.language === 'ar' ? 'ar' : 'en-US', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric',
-                        })
-                      : 'Draft'}
-                  </span>
-                </div>
-                <h3 className="text-2xl font-bold mb-3">{item.title}</h3>
-                <p className="muted-text mb-6">{item.excerpt}</p>
-                <Link
-                  to={`/blog/${item.slug || item.id}`}
-                  className="project-meta inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wider hover:text-cyan-400 transition-colors"
-                >
-                  <span>{settings?.blog_read_more_label || 'Read more'}</span>
-                  <ArrowRight size={16} className={i18n.language === 'ar' ? 'rotate-180' : ''} />
-                </Link>
-              </article>
+              <Link key={item.id} to={`/blog/${item.slug || item.id}`} className="block h-full">
+                <article className="card-surface h-full border rounded-2xl p-6 backdrop-blur-md">
+                  <div className="flex items-center justify-between gap-4 mb-4">
+                    <span className="text-cyan-400 text-sm font-semibold uppercase tracking-wider">
+                      {settings?.blog_section_label || t('header.blog')}
+                    </span>
+                    <span className="muted-text text-sm">
+                      {item.published_at
+                        ? new Date(item.published_at).toLocaleDateString(i18n.language === 'ar' ? 'ar' : 'en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                          })
+                        : 'Draft'}
+                    </span>
+                  </div>
+                  <h3 className="text-2xl font-bold mb-3">{item.title}</h3>
+                  <p className="muted-text mb-6">{item.excerpt}</p>
+                  <div className="project-meta inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wider hover:text-cyan-400 transition-colors">
+                    <span>{settings?.blog_read_more_label || settings?.blog_cta_label || t('blog.read_more')}</span>
+                    <ArrowRight size={16} className={i18n.language === 'ar' ? 'rotate-180' : ''} />
+                  </div>
+                </article>
+              </Link>
             ))}
           </div>
         </div>

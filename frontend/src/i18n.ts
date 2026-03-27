@@ -61,6 +61,33 @@ const resources = {
         "desc": "Ready to build something extraordinary? Let's talk about your next project.",
         "button": "Contact Us"
       },
+      "blog": {
+        "subtitle": "Insights & Updates",
+        "title": "From the Blog",
+        "description": "Ideas, product notes, and practical insights from our work across web, mobile, and digital growth.",
+        "cta": "Read more",
+        "read_more": "Read more",
+        "posts": {
+          "1": {
+            "category": "Web Development",
+            "date": "Mar 12, 2026",
+            "title": "What Makes a Business Website Actually Convert",
+            "excerpt": "A beautiful interface is only part of the story. Here is how structure, speed, and clarity turn visits into inquiries."
+          },
+          "2": {
+            "category": "Mobile Apps",
+            "date": "Mar 5, 2026",
+            "title": "Planning a Mobile App Without Wasting Budget",
+            "excerpt": "The right launch plan starts with priorities. We break down how to scope an app around business value instead of feature overload."
+          },
+          "3": {
+            "category": "Consulting",
+            "date": "Feb 21, 2026",
+            "title": "How Technical Strategy Saves Teams Time",
+            "excerpt": "Strong technical direction helps teams avoid rework, reduce risk, and move faster with more confidence."
+          }
+        }
+      },
       "projects": {
         "1": {
           "title": "E-Commerce Platform",
@@ -155,6 +182,33 @@ const resources = {
         "title": "كيف يمكننا المساعدة؟",
         "desc": "هل أنت مستعد لبناء شيء استثنائي؟ لنتحدث عن مشروعك القادم.",
         "button": "اتصل بنا"
+      },
+      "blog": {
+        "subtitle": "رؤى وتحديثات",
+        "title": "من المدونة",
+        "description": "أفكار وملاحظات عملية ورؤى من أعمالنا في الويب وتطبيقات الجوال والنمو الرقمي.",
+        "cta": "اقرأ المزيد",
+        "read_more": "اقرأ المزيد",
+        "posts": {
+          "1": {
+            "category": "تطوير الويب",
+            "date": "12 مارس 2026",
+            "title": "ما الذي يجعل موقع الأعمال يحقق نتائج فعلية",
+            "excerpt": "التصميم الجميل ليس كل شيء. إليك كيف تؤدي السرعة والوضوح وبنية المحتوى إلى تحويل الزيارات إلى استفسارات."
+          },
+          "2": {
+            "category": "تطبيقات الجوال",
+            "date": "5 مارس 2026",
+            "title": "كيف تخطط لتطبيق جوال بدون هدر الميزانية",
+            "excerpt": "تبدأ خطة الإطلاق الصحيحة من تحديد الأولويات. نشرح كيف يتم تحديد نطاق التطبيق حول قيمة العمل بدل تضخم الخصائص."
+          },
+          "3": {
+            "category": "الاستشارات",
+            "date": "21 فبراير 2026",
+            "title": "كيف توفر الاستراتيجية التقنية الوقت على الفرق",
+            "excerpt": "يساعد التوجيه التقني القوي الفرق على تقليل إعادة العمل وخفض المخاطر والتحرك بسرعة أكبر بثقة أعلى."
+          }
+        }
       },
       "projects": {
         "1": {

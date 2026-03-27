@@ -75,7 +75,13 @@ class SiteSettingForm
                 ->description('Footer text and footer section labels.')
                 ->schema([
                     static::plainTextArea('footer_description')->label('Footer description')->columnSpanFull(),
-                    TextInput::make('footer_links_heading')->label('Social links heading'),
+                    TextInput::make('footer_links_heading')->label('Important links heading'),
+                    TextInput::make('footer_terms_label')->label('Terms label'),
+                    TextInput::make('footer_privacy_label')->label('Privacy label'),
+                    TextInput::make('footer_refund_label')->label('Refund label'),
+                    TextInput::make('footer_cancellation_label')->label('Cancellation label'),
+                    TextInput::make('footer_promotions_label')->label('Promotions label'),
+                    TextInput::make('footer_security_label')->label('Security label'),
                 ])->columns(2),
             Section::make('Social links')
                 ->description('External profile links such as WhatsApp alternatives, LinkedIn, Instagram, and more.')
