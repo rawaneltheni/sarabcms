@@ -9,6 +9,7 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Actions\DeleteAction;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
@@ -39,6 +40,12 @@ class ProjectsTable
                 TextColumn::make('description')
                     ->label('Description')
                     ->limit(50)
+                    ->sortable(),
+                IconColumn::make('show_on_homepage')
+                    ->label('Homepage')
+                    ->boolean(),
+                TextColumn::make('homepage_order')
+                    ->label('Homepage order')
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()

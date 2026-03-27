@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Projects\Schemas;
 use App\Filament\Schemas\Components\SharedFileUpload;
 use App\Support\PlainText;
 use Filament\Schemas\Schema;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Select;
@@ -36,6 +37,17 @@ class ProjectForm
                     ->label('Description')
                     ->formatStateUsing(fn (?string $state): ?string => PlainText::clean($state))
                     ->dehydrateStateUsing(fn (?string $state): ?string => PlainText::clean($state)),
+
+                Toggle::make('show_on_homepage')
+                    ->label('Show on homepage')
+                    ->helperText('Turn this on to feature the project in Selected Works.')
+                    ->default(false),
+
+                TextInput::make('homepage_order')
+                    ->label('Homepage order')
+                    ->numeric()
+                    ->default(0)
+                    ->helperText('Lower numbers appear first on the homepage.'),
             ]);
     }
 }

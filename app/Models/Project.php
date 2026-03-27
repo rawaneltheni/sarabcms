@@ -17,6 +17,8 @@ class Project extends Model
         'slug',
         'category',
         'description',
+        'show_on_homepage',
+        'homepage_order',
     ];
 
     public function createdBy(): BelongsTo

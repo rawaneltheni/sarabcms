@@ -7,7 +7,7 @@ use App\Filament\Resources\AboutUsResource;
 use App\Filament\Resources\ContactUsResource;
 use App\Filament\Resources\FooterResource;
 use App\Filament\Resources\LegalPages\LegalPageResource;
-use App\Filament\Resources\PageBlocks\PageBlockResource;
+use App\Filament\Pages\HomepageCms;
 use App\Filament\Resources\Projects\ProjectResource;
 use App\Filament\Resources\Services\ServiceResource;
 use App\Filament\Resources\SocialLinksResource;
@@ -48,7 +48,6 @@ class SarabPanelProvider extends PanelProvider
                 ProjectResource::class,
                 StatResource::class,
                 BlogPostResource::class,
-                PageBlockResource::class,
                 ServiceResource::class,
                 AboutUsResource::class,
                 ContactUsResource::class,
@@ -61,8 +60,8 @@ class SarabPanelProvider extends PanelProvider
                 return $builder->groups([
                     NavigationGroup::make('Website CMS')
                         ->items([
-                            \Filament\Navigation\NavigationItem::make('Homepage Content')
-                                ->url(PageBlockResource::getUrl('index'))
+                            \Filament\Navigation\NavigationItem::make('Homepage CMS')
+                                ->url(HomepageCms::getUrl())
                                 ->icon('heroicon-o-rectangle-stack'),
                             \Filament\Navigation\NavigationItem::make('Stats')
                                 ->url(StatResource::getUrl('index'))

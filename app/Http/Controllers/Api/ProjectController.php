@@ -10,7 +10,12 @@ class ProjectController extends Controller
 {
     public function index()
     {
-        $projects = Project::latest()->paginate(12);
+        $projects = Project::query()
+            ->orderByDesc('show_on_homepage')
+            ->orderBy('homepage_order')
+            ->latest('id')
+            ->paginate(12);
+
         return ProjectResource::collection($projects);
     }
 

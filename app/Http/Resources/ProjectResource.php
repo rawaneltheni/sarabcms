@@ -17,6 +17,8 @@ class ProjectResource extends JsonResource
             'description' => $this->description ?? null,
             'image_path' => $this->image_path ?? null,
             'image_url' => $this->image_url ?? null,
+            'show_on_homepage' => (bool) $this->show_on_homepage,
+            'homepage_order' => $this->homepage_order ?? 0,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

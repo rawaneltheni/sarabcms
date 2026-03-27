@@ -129,6 +129,8 @@ function HomePage() {
             category: project.category ?? null,
             image: project.image_url ?? null,
             description: project.description ?? null,
+            show_on_homepage: Boolean(project.show_on_homepage),
+            homepage_order: Number(project.homepage_order ?? 0),
           })),
         );
         setHome(homeItems[0] ?? null);
@@ -165,6 +167,12 @@ function HomePage() {
     aboutBlock?.meta?.feature_2,
     aboutBlock?.meta?.feature_3,
   ].filter(Boolean) as string[];
+  const featuredProjects =
+    projects.some((project) => project.show_on_homepage)
+      ? projects
+          .filter((project) => project.show_on_homepage)
+          .sort((a, b) => (a.homepage_order ?? 0) - (b.homepage_order ?? 0))
+      : projects;
 
   const aboutFeatures =
     about?.features?.length
@@ -417,11 +425,11 @@ function HomePage() {
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
             {loading && <div className="col-span-2 py-8 text-center">Loading projects...</div>}
             {error && <div className="col-span-2 py-8 text-center text-red-500">{error}</div>}
-            {!loading && !error && projects.length === 0 && <div className="col-span-2 py-8 text-center">No projects found.</div>}
-            {projects.map((project) => (
-              <div
-                key={project.id}
-                onClick={() => setSelectedProject(project)}
+            {!loading && !error && featuredProjects.length === 0 && <div className="col-span-2 py-8 text-center">No projects found.</div>}
+            {featuredProjects.map((project) => (
+                <div
+                  key={project.id}
+                  onClick={() => setSelectedProject(project)}
                 className="project-card group relative aspect-video cursor-pointer overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-elevated)] transition-all duration-500 hover:border-cyan-500/50 hover:shadow-[0_0_30px_-5px_rgba(6,182,212,0.3)]"
               >
                 <div className="project-overlay absolute inset-0 z-10 opacity-80 transition-opacity group-hover:opacity-90"></div>

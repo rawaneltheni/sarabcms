@@ -8,6 +8,8 @@ export interface Project {
   category: string | null;
   image: string | null;
   description: string | null;
+  show_on_homepage?: boolean;
+  homepage_order?: number;
 }
 
 interface ProjectModalProps {
