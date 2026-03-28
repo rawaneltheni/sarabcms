@@ -108,6 +108,22 @@ html[data-theme="light"] .page-shell {
   color: var(--logo-muted);
 }
 
+.logo-strip-item {
+  min-width: 9rem;
+}
+
+.logo-strip-image {
+  filter: grayscale(1);
+  opacity: 0.88;
+  transition: filter 200ms ease, opacity 200ms ease, transform 200ms ease;
+}
+
+.logo-strip-item:hover .logo-strip-image {
+  filter: grayscale(0);
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
 .hero-scroll {
   color: var(--text-faint);
 }
