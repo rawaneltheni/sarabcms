@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BumpsApiCacheVersion;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
 class Project extends Model
 {
+    use BumpsApiCacheVersion;
     use SoftDeletes;
 
     protected $fillable = [
@@ -20,21 +21,6 @@ class Project extends Model
         'show_on_homepage',
         'homepage_order',
     ];
-
-    public function createdBy(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-
-    public function updatedBy(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'updated_by');
-    }
-
-    public function deletedBy(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'deleted_by');
-    }
 
     public function getImageUrlAttribute(): ?string
     {

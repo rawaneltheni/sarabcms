@@ -15,7 +15,7 @@ class EditAbout extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Action::make('back') 
+            Action::make('back')
                 ->label('Back')
                 ->url(AboutResource::getUrl('index')),
             ViewAction::make(),

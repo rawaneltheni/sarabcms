@@ -11,6 +11,10 @@ class SiteSettingResource extends JsonResource
     {
         return [
             'site_name' => $this->site_name,
+            'header_logo' => $this->header_logo,
+            'header_logo_url' => $this->header_logo_url,
+            'footer_logo' => $this->footer_logo,
+            'footer_logo_url' => $this->footer_logo_url,
             'address' => $this->address,
             'header_home_label' => $this->header_home_label,
             'header_about_label' => $this->header_about_label,

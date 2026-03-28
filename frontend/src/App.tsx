@@ -14,6 +14,7 @@ import Footer from './components/Footer';
 import ParticleLogo from './components/ParticleLogo';
 import ProjectModal, {Project} from './components/ProjectModal';
 import AnimatedCounter from './components/AnimatedCounter';
+import logoSliderFallback from './assets/white-no-text.png';
 import TermsAndConditions from './components/TermsAndConditions';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import RefundPolicy from './components/RefundPolicy';
@@ -154,38 +155,12 @@ function HomePage() {
   useEffect(() => {
     setLoading(true);
 
-    Promise.allSettled([
-      api.get('/projects'),
-      api.get('/homes'),
-      api.get('/abouts'),
-      api.get('/customers'),
-      api.get('/services'),
-      api.get('/stats'),
-      api.get('/blog-posts'),
-    ])
-      .then((results) => {
-        const [
-          projectsRes,
-          homesRes,
-          aboutRes,
-          customersRes,
-          servicesRes,
-          statsRes,
-          blogPostsRes,
-        ] = results;
-
-        const projectItems =
-          projectsRes.status === 'fulfilled'
-            ? (projectsRes.value.data?.data ?? [])
-            : [];
-        const homeItems =
-          homesRes.status === 'fulfilled'
-            ? (homesRes.value.data?.data ?? [])
-            : [];
-        const aboutItems =
-          aboutRes.status === 'fulfilled'
-            ? (aboutRes.value.data?.data ?? [])
-            : [];
+    api.get('/homepage')
+      .then((response) => {
+        const payload = response.data?.data ?? {};
+        const projectItems = payload.projects ?? [];
+        const homeItems = payload.home ?? [];
+        const aboutItems = payload.about ?? [];
 
         setProjects(
           projectItems.map((project: any) => ({
@@ -200,11 +175,21 @@ function HomePage() {
         );
         setHome(homeItems[0] ?? null);
         setAbout(aboutItems[0] ?? null);
-        setCustomers(customersRes.status === 'fulfilled' ? (customersRes.value.data?.data ?? []) : []);
-        setServices(servicesRes.status === 'fulfilled' ? (servicesRes.value.data?.data ?? []) : []);
-        setStats(statsRes.status === 'fulfilled' ? (statsRes.value.data?.data ?? []) : []);
-        setBlogPosts(blogPostsRes.status === 'fulfilled' ? (blogPostsRes.value.data?.data ?? []) : []);
-        setError(projectsRes.status === 'rejected' ? 'Failed to load selected works' : null);
+        setCustomers(payload.customers ?? []);
+        setServices(payload.services ?? []);
+        setStats(payload.stats ?? []);
+        setBlogPosts(payload.blog_posts ?? []);
+        setError(null);
+      })
+      .catch(() => {
+        setProjects([]);
+        setHome(null);
+        setAbout(null);
+        setCustomers([]);
+        setServices([]);
+        setStats([]);
+        setBlogPosts([]);
+        setError('Failed to load selected works');
       })
       .finally(() => setLoading(false));
   }, []);
@@ -301,11 +286,11 @@ function HomePage() {
   const customerMarqueeItems = customers.length
     ? customers
     : [
-        {id: -1, name: 'Client Alpha', logo_url: null, website_url: null},
-        {id: -2, name: 'Beta Corp', logo_url: null, website_url: null},
-        {id: -3, name: 'Gamma Tech', logo_url: null, website_url: null},
-        {id: -4, name: 'Delta Systems', logo_url: null, website_url: null},
-        {id: -5, name: 'Epsilon Inc', logo_url: null, website_url: null},
+        {id: -1, name: 'Client Alpha', logo_url: logoSliderFallback, website_url: null},
+        {id: -2, name: 'Beta Corp', logo_url: logoSliderFallback, website_url: null},
+        {id: -3, name: 'Gamma Tech', logo_url: logoSliderFallback, website_url: null},
+        {id: -4, name: 'Delta Systems', logo_url: logoSliderFallback, website_url: null},
+        {id: -5, name: 'Epsilon Inc', logo_url: logoSliderFallback, website_url: null},
       ];
   const serviceCards: Service[] | ServiceCardFallback[] = services.length
     ? services
@@ -495,15 +480,24 @@ function HomePage() {
                     href={customer.website_url}
                     target="_blank"
                     rel="noreferrer"
-                    className="logo-strip-text flex items-center gap-2 text-2xl font-bold uppercase tracking-widest"
+                    className="logo-strip-item flex items-center justify-center px-4"
+                    aria-label={customer.name}
                   >
-                    {customer.logo_url && <img src={customer.logo_url} alt={customer.name} className="mr-2 inline-block h-8 w-auto" />}
-                    {customer.name}
+                    <img
+                      src={customer.logo_url || logoSliderFallback}
+                      alt={customer.name}
+                      className="logo-strip-image h-12 w-auto object-contain md:h-16"
+                      referrerPolicy="no-referrer"
+                    />
                   </a>
                 ) : (
-                  <div key={customer.id} className="logo-strip-text flex items-center gap-2 text-2xl font-bold uppercase tracking-widest">
-                    {customer.logo_url && <img src={customer.logo_url} alt={customer.name} className="mr-2 inline-block h-8 w-auto" />}
-                    {customer.name}
+                  <div key={customer.id} className="logo-strip-item flex items-center justify-center px-4" aria-label={customer.name}>
+                    <img
+                      src={customer.logo_url || logoSliderFallback}
+                      alt={customer.name}
+                      className="logo-strip-image h-12 w-auto object-contain md:h-16"
+                      referrerPolicy="no-referrer"
+                    />
                   </div>
                 )
               ))}

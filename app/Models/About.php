@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BumpsApiCacheVersion;
 use Illuminate\Database\Eloquent\Model;
 
 class About extends Model
 {
+    use BumpsApiCacheVersion;
+
     protected $fillable = [
         'heading1',
         'heading2',

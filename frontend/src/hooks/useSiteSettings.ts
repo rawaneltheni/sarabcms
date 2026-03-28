@@ -3,6 +3,10 @@ import api from '../api';
 
 export interface SiteSettings {
   site_name?: string | null;
+  header_logo?: string | null;
+  header_logo_url?: string | null;
+  footer_logo?: string | null;
+  footer_logo_url?: string | null;
   address?: string | null;
   header_home_label?: string | null;
   header_about_label?: string | null;

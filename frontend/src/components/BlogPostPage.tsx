@@ -32,14 +32,14 @@ export default function BlogPostPage() {
 
     let isMounted = true;
 
-    api.get('/blog-posts')
+    api.get(`/blog-posts/${postId}`)
       .then((response) => {
         if (!isMounted) {
           return;
         }
 
-        const items: BlogPost[] = response.data?.data ?? [];
-        const current = items.find((item) => String(item.id) === postId || item.slug === postId) ?? null;
+        const payload = response.data?.data;
+        const current: BlogPost | null = payload?.post ?? null;
 
         if (!current) {
           setNotFound(true);
@@ -47,7 +47,7 @@ export default function BlogPostPage() {
         }
 
         setPost(current);
-        setOtherPosts(items.filter((item) => item.id !== current.id).slice(0, 2));
+        setOtherPosts(payload?.related ?? []);
       })
       .catch(() => {
         if (isMounted) {

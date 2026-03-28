@@ -13,6 +13,7 @@ export default function Header() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const settings = useSiteSettings();
+  const logoSrc = settings?.header_logo_url || logoImg;
 
   const toggleLanguage = () => {
     const newLang = i18n.language === 'en' ? 'ar' : 'en';
@@ -59,7 +60,7 @@ export default function Header() {
         <div className="z-50">
           <Link to="/">
             <img
-              src={logoImg}
+              src={logoSrc}
               alt="Logo"
               className={`h-10 w-auto object-contain transition-[filter] duration-300 ${theme === 'light' ? 'brightness-0' : ''}`}
               referrerPolicy="no-referrer"

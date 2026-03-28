@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BumpsApiCacheVersion;
 use Illuminate\Database\Eloquent\Model;
 
 class Home extends Model
 {
+    use BumpsApiCacheVersion;
+
     protected $table = 'home_sliders';
 
     protected $fillable = [

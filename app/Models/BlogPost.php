@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BumpsApiCacheVersion;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class BlogPost extends Model
 {
+    use BumpsApiCacheVersion;
+
     protected $fillable = [
         'title',
         'image',

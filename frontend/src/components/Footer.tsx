@@ -9,6 +9,7 @@ export default function Footer() {
   const { t } = useTranslation();
   const { theme } = useTheme();
   const settings = useSiteSettings();
+  const logoSrc = settings?.footer_logo_url || settings?.header_logo_url || logoImg;
 
   return (
     <footer className="footer-surface relative z-20 border-t py-16">
@@ -17,7 +18,7 @@ export default function Footer() {
           <div className="mb-6">
             <Link to="/">
               <img
-                src={logoImg}
+                src={logoSrc}
                 alt="Logo"
                 className={`h-10 w-auto object-contain transition-[filter] duration-300 ${theme === 'light' ? 'brightness-0' : ''}`}
                 referrerPolicy="no-referrer"

@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Resources\BlogPosts\BlogPostResource;
 use App\Filament\Resources\ContactUsResource;
+use App\Filament\Resources\Customers\CustomerResource;
 use App\Filament\Resources\FooterResource;
 use App\Filament\Resources\LegalPages\LegalPageResource;
 use App\Filament\Pages\HomepageCms;
@@ -48,6 +49,7 @@ class SarabPanelProvider extends PanelProvider
                 StatResource::class,
                 BlogPostResource::class,
                 ServiceResource::class,
+                CustomerResource::class,
                 ContactUsResource::class,
                 FooterResource::class,
                 \App\Filament\Resources\SocialLinksResource::class,
@@ -70,6 +72,9 @@ class SarabPanelProvider extends PanelProvider
                             \Filament\Navigation\NavigationItem::make('Service Cards')
                                 ->url(ServiceResource::getUrl('index'))
                                 ->icon('heroicon-o-wrench-screwdriver'),
+                            \Filament\Navigation\NavigationItem::make('Slider Logos')
+                                ->url(CustomerResource::getUrl('index'))
+                                ->icon('heroicon-o-photo'),
                             \Filament\Navigation\NavigationItem::make('Blogs')
                                 ->url(BlogPostResource::getUrl('index'))
                                 ->icon('heroicon-o-newspaper'),

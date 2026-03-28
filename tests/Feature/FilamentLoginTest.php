@@ -48,13 +48,15 @@ class FilamentLoginTest extends TestCase
 
         $this->actingAs($user);
 
-        $this->get('/sarab')->assertRedirect('/sarab/homes');
-        $this->get('/sarab/homes')->assertOk();
+        $this->get('/sarab')->assertRedirect('/sarab/homepage-cms');
+        $this->get('/sarab/homepage-cms')->assertOk();
         $this->get('/sarab/projects')->assertOk();
         $this->get('/sarab/services')->assertOk();
-        $this->get('/sarab/abouts')->assertOk();
         $this->get('/sarab/stats')->assertOk();
         $this->get('/sarab/blog-posts')->assertOk();
-        $this->get('/sarab/customers')->assertOk();
+        $this->get('/sarab/legal-pages')->assertOk();
+        $this->get('/sarab/contact-us')->assertOk();
+        $this->get('/sarab/footers')->assertOk();
+        $this->get('/sarab/social-links')->assertRedirect('/sarab/social-links/1/edit');
     }
 }

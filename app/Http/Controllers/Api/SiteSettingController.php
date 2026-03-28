@@ -5,14 +5,17 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\SiteSettingResource;
 use App\Models\SiteSetting;
+use App\Support\ApiCache;
+use Illuminate\Support\Facades\Cache;
 
 class SiteSettingController extends Controller
 {
     public function show(): SiteSettingResource
     {
-        $settings = SiteSetting::query()->firstOrCreate(
-            ['id' => 1],
-            [
+        $settings = Cache::remember(ApiCache::key('site-settings:show'), now()->addMinutes(10), static function () {
+            return SiteSetting::query()->firstOrCreate(
+                ['id' => 1],
+                [
                 'site_name' => 'SARAB TECH',
                 'address' => '651 N Broad St, Middletown, DE 19709, USA',
                 'header_home_label' => 'Home',
@@ -77,9 +80,10 @@ class SiteSettingController extends Controller
                 'twitter_url' => '#',
                 'instagram_url' => '#',
                 'linkedin_url' => '#',
-                'map_embed_url' => 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3592.885065096522!2d-80.19827602380584!3d25.76632331080786!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x88d9b684f8806209%3A0x6b490d1f76f4142!2s175%20SW%207th%20St%20%231517%2C%20Miami%2C%20FL%2033130!5e0!3m2!1sen!2sus!4v1709845612345!5m2!1sen!2sus',
-            ],
-        );
+                    'map_embed_url' => 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3592.885065096522!2d-80.19827602380584!3d25.76632331080786!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x88d9b684f8806209%3A0x6b490d1f76f4142!2s175%20SW%207th%20St%20%231517%2C%20Miami%2C%20FL%2033130!5e0!3m2!1sen!2sus!4v1709845612345!5m2!1sen!2sus',
+                ],
+            );
+        });
 
         return new SiteSettingResource($settings);
     }

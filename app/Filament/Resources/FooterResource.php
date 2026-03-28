@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Schemas\Components\SharedFileUpload;
 use App\Filament\Resources\FooterResource\Pages\EditFooter;
 use App\Filament\Resources\FooterResource\Pages\ListFooter;
 use App\Models\SiteSetting;
@@ -29,12 +30,15 @@ class FooterResource extends Resource
         return $schema->components([
             Section::make('Footer')
                 ->schema([
+                    SharedFileUpload::make('header_logo', 'Header logo', 'branding'),
+                    SharedFileUpload::make('footer_logo', 'Footer logo', 'branding'),
                     Textarea::make('footer_description')
                         ->label('Footer description')
                         ->formatStateUsing(fn (?string $state): ?string => PlainText::clean($state))
                         ->dehydrateStateUsing(fn (?string $state): ?string => PlainText::clean($state))
                         ->columnSpanFull(),
-                ]),
+                ])
+                ->columns(2),
         ]);
     }
 

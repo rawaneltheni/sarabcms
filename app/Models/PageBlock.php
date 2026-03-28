@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BumpsApiCacheVersion;
 use Illuminate\Database\Eloquent\Model;
 
 class PageBlock extends Model
 {
+    use BumpsApiCacheVersion;
+
     protected $fillable = [
         'page',
         'key',

@@ -2,12 +2,17 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BumpsApiCacheVersion;
 use Illuminate\Database\Eloquent\Model;
 
 class SiteSetting extends Model
 {
+    use BumpsApiCacheVersion;
+
     protected $fillable = [
         'site_name',
+        'header_logo',
+        'footer_logo',
         'address',
         'header_home_label',
         'header_about_label',
@@ -73,4 +78,34 @@ class SiteSetting extends Model
         'linkedin_url',
         'map_embed_url',
     ];
+
+    public function getHeaderLogoUrlAttribute(): ?string
+    {
+        $path = trim((string) ($this->header_logo ?? ''));
+
+        if ($path === '') {
+            return null;
+        }
+
+        if (filter_var($path, FILTER_VALIDATE_URL)) {
+            return $path;
+        }
+
+        return asset('storage/' . ltrim($path, '/'));
+    }
+
+    public function getFooterLogoUrlAttribute(): ?string
+    {
+        $path = trim((string) ($this->footer_logo ?? ''));
+
+        if ($path === '') {
+            return null;
+        }
+
+        if (filter_var($path, FILTER_VALIDATE_URL)) {
+            return $path;
+        }
+
+        return asset('storage/' . ltrim($path, '/'));
+    }
 }
