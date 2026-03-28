@@ -3,7 +3,6 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Resources\BlogPosts\BlogPostResource;
-use App\Filament\Resources\AboutUsResource;
 use App\Filament\Resources\ContactUsResource;
 use App\Filament\Resources\FooterResource;
 use App\Filament\Resources\LegalPages\LegalPageResource;
@@ -49,10 +48,9 @@ class SarabPanelProvider extends PanelProvider
                 StatResource::class,
                 BlogPostResource::class,
                 ServiceResource::class,
-                AboutUsResource::class,
                 ContactUsResource::class,
                 FooterResource::class,
-                SocialLinksResource::class,
+                \App\Filament\Resources\SocialLinksResource::class,
                 LegalPageResource::class,
             ])
 
@@ -78,9 +76,6 @@ class SarabPanelProvider extends PanelProvider
                             \Filament\Navigation\NavigationItem::make('Legal Pages')
                                 ->url(LegalPageResource::getUrl('index'))
                                 ->icon('heroicon-o-document-text'),
-                            \Filament\Navigation\NavigationItem::make('About Us')
-                                ->url(AboutUsResource::getUrl('index'))
-                                ->icon('heroicon-o-information-circle'),
                             \Filament\Navigation\NavigationItem::make('Contact Us')
                                 ->url(ContactUsResource::getUrl('index'))
                                 ->icon('heroicon-o-envelope'),
@@ -88,7 +83,7 @@ class SarabPanelProvider extends PanelProvider
                                 ->url(FooterResource::getUrl('index'))
                                 ->icon('heroicon-o-rectangle-group'),
                             \Filament\Navigation\NavigationItem::make('Social Links')
-                                ->url(SocialLinksResource::getUrl('index'))
+                                ->url(\App\Filament\Resources\SocialLinksResource::getUrl('index'))
                                 ->icon('heroicon-o-share'),
                         ]),
                 ]);

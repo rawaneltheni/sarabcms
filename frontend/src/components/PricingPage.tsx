@@ -25,8 +25,8 @@ type FallbackService = {
   iconComponent: React.ComponentType<{className?: string}>;
 };
 
-function resolveIcon(icon: string | null) {
-  const value = (icon || '').toLowerCase();
+function resolveIcon(icon: unknown) {
+  const value = typeof icon === 'string' ? icon.toLowerCase() : '';
 
   if (value.includes('app') || value.includes('mobile') || value.includes('phone')) {
     return Smartphone;

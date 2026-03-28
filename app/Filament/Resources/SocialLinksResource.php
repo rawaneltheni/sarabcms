@@ -39,10 +39,12 @@ class SocialLinksResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return $table->columns([
-            TextColumn::make('site_name')->label('Website'),
-            TextColumn::make('updated_at')->dateTime()->sortable(),
-        ]);
+        return $table
+            ->heading('')
+            ->columns([
+                TextColumn::make('site_name')->label('Website'),
+                TextColumn::make('updated_at')->dateTime()->sortable(),
+            ]);
     }
 
     public static function getPages(): array

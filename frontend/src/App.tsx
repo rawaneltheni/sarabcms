@@ -5,7 +5,7 @@
 
 import React, {useEffect, useRef, useState} from 'react';
 import {Link, Route, Routes} from 'react-router-dom';
-import {ArrowDown, ArrowRight, CalendarDays, CheckCircle2, Globe, Smartphone} from 'lucide-react';
+import {ArrowDown, ArrowRight, CalendarDays, CheckCircle2, Globe, HandCoins, MessageSquareText, Presentation, Smartphone} from 'lucide-react';
 import {motion, useScroll, useTransform} from 'motion/react';
 import {useTranslation} from 'react-i18next';
 import api from './api';
@@ -83,6 +83,43 @@ interface ServiceCardFallback {
   title: string;
   description: string;
   icon: React.ComponentType<{className?: string}>;
+}
+
+function normalizeStringArray(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.filter((item): item is string => typeof item === 'string' && item.trim().length > 0);
+  }
+
+  if (typeof value === 'string') {
+    return value
+      .split(/\r?\n|,/)
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+}
+
+function resolveServiceIcon(icon: unknown) {
+  const value = typeof icon === 'string' ? icon.toLowerCase() : '';
+
+  if (value.includes('mobile') || value.includes('phone') || value.includes('app')) {
+    return Smartphone;
+  }
+
+  if (value.includes('comment') || value.includes('chat')) {
+    return MessageSquareText;
+  }
+
+  if (value.includes('hand-holding') || value.includes('dollar') || value.includes('fund')) {
+    return HandCoins;
+  }
+
+  if (value.includes('chalkboard') || value.includes('consult')) {
+    return Presentation;
+  }
+
+  return Globe;
 }
 
 function HomePage() {
@@ -252,9 +289,10 @@ function HomePage() {
   ];
   const homepageBlogPosts = blogPosts.length ? blogPosts.slice(0, 3) : fallbackBlogPosts;
 
+  const normalizedAboutFeatures = normalizeStringArray(about?.features);
   const aboutFeatures =
-    about?.features?.length
-      ? about.features
+    normalizedAboutFeatures.length
+      ? normalizedAboutFeatures
       : aboutBlockFeatures.length
         ? aboutBlockFeatures
         : [t('about.point_1'), t('about.point_2'), t('about.point_3')];
@@ -488,8 +526,13 @@ function HomePage() {
               <div key={'id' in service ? service.id : service.key} className="card-surface rounded-2xl border p-8 backdrop-blur-md transition-colors hover:border-cyan-500/30">
                 {'image_url' in service && service.image_url ? (
                   <img src={service.image_url} alt={service.title || 'Service'} className="mb-6 h-12 w-12 object-contain" />
-                ) : 'icon' in service ? (
+                ) : 'icon' in service && typeof service.icon === 'function' ? (
                   <service.icon className="mb-6 h-12 w-12 text-cyan-400" />
+                ) : 'icon' in service ? (
+                  (() => {
+                    const IconComponent = resolveServiceIcon(service.icon as string | null);
+                    return <IconComponent className="mb-6 h-12 w-12 text-cyan-400" />;
+                  })()
                 ) : null}
                 <h3 className="mb-4 text-2xl font-bold">{service.title}</h3>
                 <p className="muted-text">{service.description}</p>
