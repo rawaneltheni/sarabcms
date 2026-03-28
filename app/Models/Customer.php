@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BumpsApiCacheVersion;
 use Illuminate\Database\Eloquent\Model;
 
 class Customer extends Model
 {
+    use BumpsApiCacheVersion;
+
     protected $fillable = [
         'name',
         'logo_path',
